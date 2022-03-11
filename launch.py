@@ -43,7 +43,7 @@ SSFN = checkSSFN()
 
 while ("ssfn" not in SSFN):
     subprocess.call(["echo","You need to manually log in, the setup will continue once it detecs a valid login"])
-    subprocess.call(["echo","docker exec -it <container_name> /bin/bash /steamcmd/steamcmd.sh +login +quit"])
+    subprocess.call(["echo","docker exec -it <container_name> /bin/bash /steamcmd/steamcmd.sh +login <steam_user> +quit"])
     subprocess.call(["sleep","10"])
     SSFN = checkSSFN()
 
