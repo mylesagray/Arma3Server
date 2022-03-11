@@ -8,6 +8,7 @@ RUN apt-get update \
     && \
     apt-get install -y --no-install-recommends --no-install-suggests \
         python3 \
+        python3-requests \
         lib32stdc++6 \
         lib32gcc1 \
         wget \
