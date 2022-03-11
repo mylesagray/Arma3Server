@@ -78,4 +78,8 @@ if res:
 currentTime = datetime.now().strftime("%H:%M:%S")
 
 
+# TODO Get Server version from logs
+# TODO Get the message id to modify
+# TODO Implement proper update warning
+
 update_webhook()
