@@ -1,7 +1,5 @@
 # Arma 3 Dedicated Server
 
-![Docker Pulls](https://img.shields.io/docker/pulls/mylesagray/arma3-server?style=for-the-badge)
-
 This is a docker image for hosting an Arma 3 dedicated server. It is forked from [BrettMayson's image](https://github.com/brettmayson/arma3server), with some changes made by me to fix a couple of issues I was having with it, as well as making modification of the basic.cfg settings a little bit easier.
 
 We removed the need to statically pass in the password via env vars, and accomodate 2FA via a startup script that prompts you to exec into the container to login, this means that it doesn't stun-lock your login so that it rate limits your login.
