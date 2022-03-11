@@ -2,7 +2,7 @@ version: '2.2'
 services:
   arma3:
     build: .
-    image: ghcr.io/mylesagray/arma3-server:0.1
+    image: ghcr.io/mylesagray/arma3-server:latest
     container_name: arma3
     network_mode: host
     volumes:
