@@ -23,14 +23,14 @@ if not os.path.isdir(KEYS):
         os.remove(KEYS)
     os.makedirs(KEYS)
 
-# check if there's a ssfn(\d) file, if it exists there  is login data,
+# check if there's a userdata folder other than anonymous, if it exists there  is login data,
 # if not this script will NOT try to log in further until you log in manually
 # this is required for proper 2FA and also to never store your password in ENV
 
-def checkSSFN():
+def checkUSER():
     try:
-        SSFN = subprocess.check_output(['ls','/root/Steam/']).decode("utf-8")
-        return SSFN
+        USER = subprocess.check_output(['ls','/root/Steam/userdata/']).decode("utf-8").rstrip()
+        return USER
     except subprocess.CalledProcessError:
         subprocess.call(["echo", "Initial steam setup"])
         steamcmd = ["/steamcmd/steamcmd.sh"]
@@ -39,13 +39,13 @@ def checkSSFN():
         subprocess.call(steamcmd)
         exit()
 
-SSFN = checkSSFN()
+USER = checkUSER()
 
-while ("ssfn" not in SSFN):
+while (USER == "anonymous"):
     subprocess.call(["echo","You need to manually log in, the setup will continue once it detecs a valid login"])
     subprocess.call(["echo","docker exec -it <container_name> /bin/bash /steamcmd/steamcmd.sh +login <steam_user> +quit"])
     subprocess.call(["sleep","10"])
-    SSFN = checkSSFN()
+    USER = checkUSER()
 
 subprocess.call(["echo", "Login data found, commencing with startup"])
 
