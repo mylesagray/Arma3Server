@@ -29,7 +29,7 @@ if not os.path.isdir(KEYS):
 
 def checkSSFN():
     try:
-        SSFN = str(subprocess.check_output(['ls','/root/Steam/']))
+        SSFN = subprocess.check_output(['ls','/root/Steam/']).decode("utf-8")
         return SSFN
     except subprocess.CalledProcessError:
         subprocess.call(["echo", "Initial steam setup"])
@@ -43,7 +43,7 @@ SSFN = checkSSFN()
 
 while ("ssfn" not in SSFN):
     subprocess.call(["echo","You need to manually log in, the setup will continue once it detecs a valid login"])
-    subprocess.call(["echo","docker exec -it <container_name> /bin/bash /steamcmd/steamcmd.sh +login"])
+    subprocess.call(["echo","docker exec -it <container_name> /bin/bash /steamcmd/steamcmd.sh +login +quit"])
     subprocess.call(["sleep","10"])
     SSFN = checkSSFN()
 
