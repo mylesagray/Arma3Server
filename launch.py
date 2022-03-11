@@ -16,6 +16,7 @@ def env_defined(key):
 
 CONFIG_FILE = os.environ["ARMA_CONFIG"]
 BASIC_CONFIG_FILE = os.environ["BASIC_CONFIG"]
+CONTAINER_ID = subprocess.check_output(["cat","/proc/1/cpuset"]).decode("utf-8")[8:20]
 KEYS = "/arma3/keys"
 
 if not os.path.isdir(KEYS):
@@ -43,7 +44,7 @@ USER = checkUSER()
 
 while (USER == "anonymous"):
     subprocess.call(["echo","You need to manually log in, the setup will continue once it detecs a valid login"])
-    subprocess.call(["echo","docker exec -it <container_name> /bin/bash /steamcmd/steamcmd.sh +login "+os.environ["STEAM_USER"]+" +quit"])
+    subprocess.call(["echo","docker exec -it "+CONTAINER_ID+" /bin/bash /steamcmd/steamcmd.sh +login "+os.environ["STEAM_USER"]+" +quit"])
     subprocess.call(["sleep","10"])
     USER = checkUSER()
 
