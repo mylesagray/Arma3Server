@@ -1,0 +1,8 @@
+.env
+/.vs
+/workshop
+/servermods
+/mods
+/missions/*.pbo
+/configs/main.cfg
+/configs/profiles/
