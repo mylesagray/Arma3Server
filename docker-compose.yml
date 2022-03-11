@@ -1,6 +1,6 @@
 version: '2.2'
 services:
-  arma3-vanilla:
+  arma3:
     build: .
     image: ghcr.io/mylesagray/arma3-server:latest
     network_mode: host
