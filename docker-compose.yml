@@ -1,9 +1,8 @@
 version: '2.2'
 services:
-  arma3:
+  arma3-vanilla:
     build: .
     image: ghcr.io/mylesagray/arma3-server:latest
-    container_name: arma3
     network_mode: host
     volumes:
       - './missions:/arma3/mpmissions'
