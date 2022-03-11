@@ -43,7 +43,7 @@ USER = checkUSER()
 
 while (USER == "anonymous"):
     subprocess.call(["echo","You need to manually log in, the setup will continue once it detecs a valid login"])
-    subprocess.call(["echo","docker exec -it <container_name> /bin/bash /steamcmd/steamcmd.sh +login <steam_user> +quit"])
+    subprocess.call(["echo","docker exec -it <container_name> /bin/bash /steamcmd/steamcmd.sh +login "+os.environ["STEAM_USER"]+" +quit"])
     subprocess.call(["sleep","10"])
     USER = checkUSER()
 
