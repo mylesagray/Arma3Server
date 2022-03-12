@@ -8,9 +8,11 @@ RUN apt-get update \
     && \
     apt-get install -y --no-install-recommends --no-install-suggests \
         python3 \
-        python3-requests \
+        python3-dev \
+        python3-pip \
         lib32stdc++6 \
         lib32gcc1 \
+        build-essential \
         wget \
         ca-certificates \
     && \
@@ -25,6 +27,8 @@ RUN apt-get update \
     mkdir -p /steamcmd \
     && \
     wget -qO- 'https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz' | tar zxf - -C /steamcmd
+
+RUN python3 -m pip install -U python-dotenv discord.py
 
 ENV ARMA_BINARY=./arma3server
 ENV ARMA_CONFIG=main.cfg

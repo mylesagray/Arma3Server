@@ -1,7 +1,7 @@
 import os
 import re
 import subprocess
-
+from time import sleep
 import local
 import workshop
 
@@ -44,11 +44,13 @@ def checkUSER():
         exit()
 
 USER = checkUSER()
-
-while (USER == "anonymous"):
+if USER == "anonymous":
     subprocess.call(["echo","You need to manually log in, the setup will continue once it detecs a valid login"])
     subprocess.call(["echo","docker exec -it "+CONTAINER_ID+" /bin/bash /steamcmd/steamcmd.sh +login "+os.environ["STEAM_USER"]+" +quit"])
-    subprocess.call(["sleep","10"])
+
+
+while (USER == "anonymous"):
+    sleep(10)
     USER = checkUSER()
 
 subprocess.call(["echo", "Login data found, commencing with startup"])
