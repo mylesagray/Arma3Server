@@ -28,7 +28,7 @@ RUN apt-get update \
     && \
     wget -qO- 'https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz' | tar zxf - -C /steamcmd
 
-RUN python3 -m pip install -U python-dotenv discord.py
+RUN python3 -m pip install -U discord.py
 
 ENV ARMA_BINARY=./arma3server
 ENV ARMA_CONFIG=main.cfg

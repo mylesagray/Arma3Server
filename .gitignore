@@ -4,5 +4,6 @@
 /servermods
 /mods
 /missions/*.pbo
+/missions/readme.txt
 /configs/main.cfg
 /configs/profiles/
