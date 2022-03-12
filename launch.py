@@ -136,4 +136,5 @@ if os.path.exists("servermods"):
     launch += mod_param("serverMod", local.mods("servermods"))
 
 print("LAUNCHING ARMA SERVER WITH", launch, flush=True)
+launch += ' | tee /arma3/startup.log'
 os.system(launch)
