@@ -1,7 +1,7 @@
 import os
 import re
 import subprocess
-
+from time import sleep
 import local
 import workshop
 
@@ -16,6 +16,10 @@ def env_defined(key):
 
 CONFIG_FILE = os.environ["ARMA_CONFIG"]
 BASIC_CONFIG_FILE = os.environ["BASIC_CONFIG"]
+CONTAINER_ID = subprocess.check_output(["cat","/proc/1/cpuset"]).decode("utf-8")[8:20]
+# since macOS docker is weird and /proc/1/cpuset is empty
+if len(CONTAINER_ID) < 4:
+    CONTAINER_ID = "<container>"
 KEYS = "/arma3/keys"
 
 if not os.path.isdir(KEYS):
@@ -40,11 +44,13 @@ def checkUSER():
         exit()
 
 USER = checkUSER()
+if USER == "anonymous":
+    subprocess.call(["echo","You need to manually log in, the setup will continue once it detecs a valid login"])
+    subprocess.call(["echo","docker exec -it "+CONTAINER_ID+" /bin/bash /steamcmd/steamcmd.sh +login "+os.environ["STEAM_USER"]+" +quit"])
+
 
 while (USER == "anonymous"):
-    subprocess.call(["echo","You need to manually log in, the setup will continue once it detecs a valid login"])
-    subprocess.call(["echo","docker exec -it <container_name> /bin/bash /steamcmd/steamcmd.sh +login <steam_user> +quit"])
-    subprocess.call(["sleep","10"])
+    sleep(10)
     USER = checkUSER()
 
 subprocess.call(["echo", "Login data found, commencing with startup"])
@@ -130,4 +136,5 @@ if os.path.exists("servermods"):
     launch += mod_param("serverMod", local.mods("servermods"))
 
 print("LAUNCHING ARMA SERVER WITH", launch, flush=True)
+launch += ' | tee /arma3/startup.log'
 os.system(launch)

@@ -4,5 +4,8 @@
 /servermods
 /mods
 /missions/*.pbo
+/missions/readme.txt
 /configs/main.cfg
+/configs/discord.cfg
 /configs/profiles/
+Pipfile*
