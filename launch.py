@@ -17,6 +17,9 @@ def env_defined(key):
 CONFIG_FILE = os.environ["ARMA_CONFIG"]
 BASIC_CONFIG_FILE = os.environ["BASIC_CONFIG"]
 CONTAINER_ID = subprocess.check_output(["cat","/proc/1/cpuset"]).decode("utf-8")[8:20]
+# since macOS docker is weird and /proc/1/cpuset is empty
+if len(CONTAINER_ID) < 4:
+    CONTAINER_ID = "<container>"
 KEYS = "/arma3/keys"
 
 if not os.path.isdir(KEYS):
