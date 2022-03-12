@@ -1,9 +1,6 @@
 version: '2.2'
 services:
   arma3:
-    build:
-      context: .
-      dockerfile: Dockerfile
     image: ghcr.io/mylesagray/arma3-server:latest
     network_mode: host
     volumes:
