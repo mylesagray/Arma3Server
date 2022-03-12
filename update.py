@@ -55,29 +55,29 @@ def env_defined(key):
 
 
 def get_install_state():
-    steamcmd = ["/steamcmd/steamcmd.sh"]
-    steamcmd.extend(["+@ShutdownOnFailedCommand", "1"])
-    steamcmd.extend(["+@NoPromptForPassword", "1"])
-    steamcmd.extend(["+force_install_dir", "/arma3"])
-    steamcmd.extend(["+login", "anonymous"])
-    steamcmd.extend(["+app_info_update", "1"])
-    steamcmd.extend(["+app_status", "233780"])
-    if env_defined("STEAM_BRANCH"):
-      steamcmd.extend(["-beta", os.environ["STEAM_BRANCH"]])
-    if env_defined("STEAM_BRANCH_PASSWORD"):
-      steamcmd.extend(["-betapassword", os.environ["STEAM_BRANCH_PASSWORD"]])
-    steamcmd.extend(["+quit"])
-    install_state = subprocess.check_output(steamcmd).decode("utf-8")
-    res = re.search("install state: (.+?),\n", install_state)
-    if res:
-      res = res.group(1)
-    return res
+  install_state = "undefined"
+  steamcmd = ["/steamcmd/steamcmd.sh"]
+  steamcmd.extend(["+@ShutdownOnFailedCommand", "1"])
+  steamcmd.extend(["+@NoPromptForPassword", "1"])
+  steamcmd.extend(["+force_install_dir", "/arma3"])
+  steamcmd.extend(["+login", "anonymous"])
+  steamcmd.extend(["+app_info_update", "1"])
+  steamcmd.extend(["+app_status", "233780"])
+  if env_defined("STEAM_BRANCH"):
+    steamcmd.extend(["-beta", os.environ["STEAM_BRANCH"]])
+  if env_defined("STEAM_BRANCH_PASSWORD"):
+    steamcmd.extend(["-betapassword", os.environ["STEAM_BRANCH_PASSWORD"]])
+  steamcmd.extend(["+quit"])
+  res = subprocess.check_output(steamcmd).decode("utf-8")
+  res = re.search("install state: (.+?),\n", res)
+  if res:
+    install_state = res.group(1)
+  return install_state
 
 def get_version():
+  version = "undefined"
   res = subprocess.check_output(["more", LOG_FILE]).decode("utf-8")
-  return res
-
-get_version()
-# TODO Get Server version from logs
-# TODO Get the message id to modify
-# TODO Implement proper update warning
+  res = re.search("Arma 3 Console version (.+?) x64(.+?)", res)
+  if res:
+    version = res.group(1)
+  return version
