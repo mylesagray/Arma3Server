@@ -54,11 +54,11 @@ USER ${USER}
 
 STOPSIGNAL SIGINT
 
+WORKDIR /app
+COPY app/ .
+
 WORKDIR /arma3
-
-COPY *.py /
-
-CMD ["python3","/launch.py"]
+CMD ["python3","/app/launch.py"]
 
 # Expose ports
 EXPOSE 2302/udp \

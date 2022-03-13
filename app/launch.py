@@ -1,6 +1,7 @@
 import os
 import re
 import subprocess
+import signal
 from time import sleep
 import local
 import workshop
@@ -77,10 +78,9 @@ if os.environ["MODS_PRESET"] != "":
 if os.environ["MODS_LOCAL"] == "true" and os.path.exists("mods"):
     mods.extend(local.mods("mods"))
 
-## Build launcher command
+## Build launchopts
 
-launch = "{} -limitFPS={} -world={} {} {}".format(
-    os.environ["ARMA_BINARY"],
+launchopts = " -limitFPS={} -world={} {} {}".format(
     os.environ["ARMA_LIMITFPS"],
     os.environ["ARMA_WORLD"],
     os.environ["ARMA_PARAMS"],
@@ -91,7 +91,7 @@ launch = "{} -limitFPS={} -world={} {} {}".format(
 
 if os.environ["ARMA_CDLC"] != "":
     for cdlc in os.environ["ARMA_CDLC"].split(";"):
-        launch += " -mod={}".format(cdlc)
+        launchopts += " -mod={}".format(cdlc)
 
 # Check if using headless clients and create configs if so
 
@@ -116,35 +116,39 @@ if clients != 0:
 
         with open("/tmp/arma3.cfg", "w") as tmp_config:
             tmp_config.write(data)
-        launch += ' -config="/tmp/arma3.cfg"'
+        launchopts += ' -config="/tmp/arma3.cfg"'
 
-    client_launch = launch
-    client_launch += " -client -connect=127.0.0.1"
+    client_launchopts = launchopts
+    client_launchopts += " -client -connect=127.0.0.1"
     if "password" in config_values:
-        client_launch += " -password={}".format(config_values["password"])
+        client_launchopts += " -password={}".format(config_values["password"])
 
     for i in range(0, clients):
-        hc_launch = client_launch + ' -name="{}-hc-{}"'.format(
+        hc_launchopts = client_launchopts + ' -name="{}-hc-{}"'.format(
             os.environ["ARMA_PROFILE"], i
         )
-        print("LAUNCHING ARMA CLIENT {} WITH".format(i), hc_launch)
-        subprocess.Popen(hc_launch, shell=True)
+        print("LAUNCHING ARMA CLIENT {} WITH".format(i), hc_launchopts)
+        subprocess.Popen(hc_launchopts, shell=True)
 else:
-    launch += ' -config="/arma3/configs/{}"'.format(CONFIG_FILE)
+    launchopts += ' -config="/arma3/configs/{}"'.format(CONFIG_FILE)
 
-# Add ports and profiles config to launcher
+# Add ports and profiles config to launchopts
 
-launch += ' -port={} -name="{}" -profiles="/arma3/configs/profiles"'.format(
+launchopts += ' -port={} -name="{}" -profiles="/arma3/configs/profiles"'.format(
     os.environ["PORT"], os.environ["ARMA_PROFILE"]
 )
 
 # Load servermods if exists
 
 if os.path.exists("servermods"):
-    launch += mod_param("serverMod", local.mods("servermods"))
+    launchopts += mod_param("serverMod", local.mods("servermods"))
 
 # Launch ArmA Server
-
-print("LAUNCHING ARMA SERVER WITH", launch, flush=True)
-launch += ' | tee /arma3/startup.log'
-os.system(launch)
+print("LAUNCHING ARMA SERVER WITH", launchopts, flush=True)
+armaprocess = subprocess.Popen([os.environ["ARMA_BINARY"], launchopts])
+try:
+    armaprocess.wait()
+except KeyboardInterrupt:
+    subprocess.call(["echo", "Shutting down"])
+    armaprocess.terminate()
+    raise

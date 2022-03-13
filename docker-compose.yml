@@ -5,6 +5,5 @@ services:
     network_mode: host
     volumes:
       - './arma3:/arma3'
-      - './steam:/root/Steam'
     env_file: .env
     restart: unless-stopped
