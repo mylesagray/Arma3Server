@@ -1,11 +1,4 @@
 .env
 /.vs
-/workshop
-/servermods
-/mods
-/missions/*.pbo
-/missions/readme.txt
-/configs/main.cfg
-/configs/discord.cfg
-/configs/profiles/
+/arma3
 Pipfile*
