@@ -40,13 +40,13 @@ def env_defined(key):
 
 def get_install_state():
   install_state = "undefined"
-  steamcmd = ["/steamcmd/steamcmd.sh"]
+  steamcmd = [os.environ["STEAMCMDDIR"] + "/steamcmd.sh"]
   steamcmd.extend(["+@ShutdownOnFailedCommand", "1"])
   steamcmd.extend(["+@NoPromptForPassword", "1"])
   steamcmd.extend(["+force_install_dir", "/arma3"])
   steamcmd.extend(["+login", "anonymous"])
   steamcmd.extend(["+app_info_update", "1"])
-  steamcmd.extend(["+app_status", "233780"])
+  steamcmd.extend(["+app_status", os.environ["STEAM_APPID"]])
   if env_defined("STEAM_BRANCH"):
     steamcmd.extend(["-beta", os.environ["STEAM_BRANCH"]])
   if env_defined("STEAM_BRANCH_PASSWORD"):
