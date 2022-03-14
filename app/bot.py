@@ -76,19 +76,20 @@ async def _setup(ctx, *arg):
         settings["DISCORD_SERVER"] = {}
     if server not in settings["DISCORD_SERVER"]:
         settings["DISCORD_SERVER"][server] = {"name":server, "channels":[channel], "msgids":[]}
-        response = "Channel added, pin this message"
+        response = "Channel added"
     else:
         if channel not in settings["DISCORD_SERVER"][server]["channels"]:
             settings["DISCORD_SERVER"][server]["channels"].append(channel)
-            response = "Channel added, pin this message"
+            response = "Channel added"
         else:
             response = "Channel already monitored"
-            await ctx.send(response)
+            await ctx.send(response, delete_after=15)
             return
     # Gather message id for editing purposes
     res = await ctx.send(response)
     if res.id not in settings["DISCORD_SERVER"][server]["msgids"]:
         settings["DISCORD_SERVER"][server]["msgids"].append(res.id)
+        await ctx.pin()
     res = save_settings(settings)
     if not res:
         response = "Saving the settings failed, call an adult"
