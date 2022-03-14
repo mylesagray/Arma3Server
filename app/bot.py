@@ -89,7 +89,7 @@ async def _setup(ctx, *arg):
     res = await ctx.send(response)
     if res.id not in settings["DISCORD_SERVER"][server]["msgids"]:
         settings["DISCORD_SERVER"][server]["msgids"].append(res.id)
-        await ctx.pin()
+        #bot.get_channel(channel).fetch_message(res.id).pin()
     res = save_settings(settings)
     if not res:
         response = "Saving the settings failed, call an adult"
@@ -124,13 +124,13 @@ async def _update(ctx, *args):
     # No servers configured = no need to process further
     if "DISCORD_SERVER" not in settings:
         return
-    cnt = 0
     status = update.get_install_state()
     version = update.get_version()
     embed = discord.Embed(type="rich")
     embed.add_field(name="Server status", value=status, inline=True)
     embed.add_field(name="Server version", value=version, inline=True)
     for server in settings["DISCORD_SERVER"]:
+        cnt = 0
         for channel in settings["DISCORD_SERVER"][server]["channels"]:
             chan = bot.get_channel(channel)
             message = await chan.fetch_message(settings["DISCORD_SERVER"][server]["msgids"][cnt])

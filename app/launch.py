@@ -145,6 +145,7 @@ if os.path.exists("servermods"):
 
 # Launch ArmA Server
 print("LAUNCHING ARMA SERVER WITH", launchopts, flush=True)
+botprocess = subprocess.Popen(["python3", "/app/bot.py"])
 armaprocess = subprocess.Popen([os.environ["ARMA_BINARY"], launchopts])
 try:
     armaprocess.wait()
