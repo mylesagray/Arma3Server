@@ -1,20 +1,21 @@
+from email import message
 import os
 import discord
 import update
 import json
+from discord.ext import commands
 
 def env_defined(key):
     return key in os.environ and len(os.environ[key]) > 0
 
 
 DISCORD_CHANNEL = []
-
-# env variables are defaults, if no config exists it'll be created
+# env variables are defaults, if no config file exists it'll be created.
+# If no env is set, stop the bot
 try:
-    DISCORD_SERVER = os.environ["DISCORD_SERVER"]
     DISCORD_TOKEN = os.environ["DISCORD_TOKEN"]
 except:
-    print("Missing config values")
+    print("Missing token")
     exit()
 
 DISCORD_CONFIG = "/arma3/configs/discord.cfg"
@@ -25,45 +26,117 @@ def load_settings():
         settings = json.load(f)
         f.close()
     except:
-        return 0
+        try:
+            settings = {"DISCORD_TOKEN":DISCORD_TOKEN}
+            with open(DISCORD_CONFIG, 'w', encoding='utf-8') as f:
+                json.dump(settings, f, ensure_ascii=False, indent=4)
+        except:
+            print(DISCORD_CONFIG+" not accessible")
+            exit()
     return settings
 
-
 settings = load_settings()
-if not settings:
-    try:
-        settings = {"DISCORD_SERVER":DISCORD_SERVER,"DISCORD_TOKEN":DISCORD_TOKEN}
-        with open(DISCORD_CONFIG, 'w', encoding='utf-8') as f:
-            json.dump(settings, f, ensure_ascii=False, indent=4)
-    except:
-        print(DISCORD_CONFIG+" not accessible")
 
-if (settings["DISCORD_SERVER"]):
-    DISCORD_SERVER = settings["DISCORD_SERVER"]
 if (settings["DISCORD_TOKEN"]):
     DISCORD_TOKEN = settings["DISCORD_TOKEN"]
 
+# straight forward, saves the settings json to DISCORD_CONFIG
+def save_settings(jsonString):
+    try:
+        with open(DISCORD_CONFIG, 'w', encoding='utf-8') as f:
+            json.dump(jsonString, f, ensure_ascii=False, indent=4)
+    except:
+        return 0
+    return 1
 
-client = discord.Client()
+desc = '''Arma3 server status bot:
+!setup - add this channel to update notification list
+!delete - removes this channel from update notification list'''
 
-@client.event
-async def on_message(message):
-    if message.author == "kharms#1207": #this is a bit dumb, but # in config files gets interpreted as comment
-        return
-    if message.content == '!settings add channel':
-        channel = str(message.channel.id)
-        if (channel in DISCORD_CHANNEL):
-            await message.channel.send("Already set to this channel")
+bot = commands.Bot(command_prefix='!', description=desc)
+
+@bot.command(name="get")
+async def _get(ctx, arg):
+    response = desc
+    if (arg == "version"):
+        response = update.get_version()
+    if (arg == "status"):
+        response = update.get_install_state()
+    await ctx.send(response)
+
+@bot.command(name="setup")
+async def _setup(ctx, *arg):
+    response = ""
+    # if no server has been set up, create the root element and add this server to it
+    # discord calls servers guilds
+    server = str(ctx.guild)
+    channel = ctx.channel.id
+    # check if the server is already known, check if the channel is, if not add one or both
+    if "DISCORD_SERVER" not in settings:
+        settings["DISCORD_SERVER"] = {}
+    if server not in settings["DISCORD_SERVER"]:
+        settings["DISCORD_SERVER"][server] = {"name":server, "channels":[channel], "msgids":[]}
+        response = "Channel added"
+    else:
+        if channel not in settings["DISCORD_SERVER"][server]["channels"]:
+            settings["DISCORD_SERVER"][server]["channels"].append(channel)
+            response = "Channel added"
         else:
-            # TODO Add channel to discord.cfg
-            DISCORD_CHANNEL.append(str(channel))
-            os.system("export DISCORD_CHANNEL=\""+str(DISCORD_CHANNEL)+"\"")
-            await message.channel.send("Added "+channel+" to DISCORD_CHANNEL.\nMake sure to add this ID to your .env if you haven't already.")
-    
-    if message.content == '!get version':
-        await message.channel.send(update.get_version())
-    if message.content == '!get install_state':
-        await message.channel.send(update.get_install_state())
-    if message.content == '!get settings':
-        await message.channel.send(load_settings())
-client.run(DISCORD_TOKEN)
+            response = "Channel already monitored"
+            await ctx.send(response, delete_after=15)
+            return
+    # Gather message id for editing purposes
+    res = await ctx.send(response)
+    if res.id not in settings["DISCORD_SERVER"][server]["msgids"]:
+        settings["DISCORD_SERVER"][server]["msgids"].append(res.id)
+        await ctx.pin()
+    res = save_settings(settings)
+    if not res:
+        response = "Saving the settings failed, call an adult"
+        ctx.send(response)
+
+
+@bot.command(name="delete")
+async def _delete(ctx, *arg):
+    response = "Channel not monitored"
+    server = str(ctx.guild)
+    channel = ctx.channel.id
+    if server in settings["DISCORD_SERVER"]:
+        if channel in settings["DISCORD_SERVER"][server]["channels"]:
+            try:
+                idx = settings["DISCORD_SERVER"][server]["channels"].index(channel)
+                settings["DISCORD_SERVER"][server]["channels"].remove(channel)
+                msg = await bot.get_channel(channel).fetch_message(settings["DISCORD_SERVER"][server]["msgids"][idx])
+                del(settings["DISCORD_SERVER"][server]["msgids"][idx])
+                response = "Channel removed"
+                await msg.delete()
+            except Exception as e:
+                print(e)
+    res = save_settings(settings)
+    if not res:
+        response = "Saving the settings failed, call an adult"
+    await ctx.send(response)
+
+
+@bot.command(name="update")
+async def _update(ctx, *args):
+    response = ""
+    # No servers configured = no need to process further
+    if "DISCORD_SERVER" not in settings:
+        return
+    cnt = 0
+    status = update.get_install_state()
+    version = update.get_version()
+    embed = discord.Embed(type="rich")
+    embed.add_field(name="Server status", value=status, inline=True)
+    embed.add_field(name="Server version", value=version, inline=True)
+    for server in settings["DISCORD_SERVER"]:
+        for channel in settings["DISCORD_SERVER"][server]["channels"]:
+            chan = bot.get_channel(channel)
+            message = await chan.fetch_message(settings["DISCORD_SERVER"][server]["msgids"][cnt])
+            await message.edit(content="",embed=embed)
+            cnt += 1
+    await ctx.message.delete()
+
+bot.run(DISCORD_TOKEN)
+

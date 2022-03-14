@@ -5,30 +5,6 @@ import subprocess
 import json
 from datetime import datetime, date, timedelta
 
-
-WEBHOOK_JSON = json.loads("""
-{
-  "username": "ALARMA",
-  "avatar_url": "https://s.minuq.net/bb.jpg",
-  "content": "ARMA3 Server status",
-  "embeds": [
-    {
-      "fields": [
-        {
-          "name": "Server status",
-          "value": "online/offline",
-          "inline": true
-        },
-        {
-          "name": "Server version",
-          "value": "Yup",
-          "inline": true
-        }
-      ]
-    }
-  ]
-}
-""")
 LOG_FILE="/arma3/startup.log"
 
 def env_defined(key):
