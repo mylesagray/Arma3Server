@@ -1,21 +1,22 @@
 import os
 import re
 import subprocess
+import signal
 from time import sleep
 import local
 import workshop
 
-
 def mod_param(name, mods):
     return ' -{}="{}" '.format(name, ";".join(mods))
-
 
 def env_defined(key):
     return key in os.environ and len(os.environ[key]) > 0
 
-
 CONFIG_FILE = os.environ["ARMA_CONFIG"]
 BASIC_CONFIG_FILE = os.environ["BASIC_CONFIG"]
+
+## Build login command
+
 CONTAINER_ID = subprocess.check_output(["cat","/proc/1/cpuset"]).decode("utf-8")[8:20]
 # since macOS docker is weird and /proc/1/cpuset is empty
 if len(CONTAINER_ID) < 4:
@@ -33,34 +34,33 @@ if not os.path.isdir(KEYS):
 
 def checkUSER():
     try:
-        USER = subprocess.check_output(['ls','/root/Steam/userdata/']).decode("utf-8").rstrip()
-        return USER
+        STEAMUSER = subprocess.check_output(['ls', os.environ["HOMEDIR"] + '/Steam/userdata/']).decode("utf-8").rstrip()
+        return STEAMUSER
     except subprocess.CalledProcessError:
         subprocess.call(["echo", "Initial steam setup"])
-        steamcmd = ["/steamcmd/steamcmd.sh"]
+        steamcmd = [os.environ["STEAMCMDDIR"] + "/steamcmd.sh"]
         steamcmd.extend(["+login", "anonymous"])
         steamcmd.extend(["+quit"])
         subprocess.call(steamcmd)
         exit()
 
-USER = checkUSER()
-if USER == "anonymous":
+STEAMUSER = checkUSER()
+if STEAMUSER == "anonymous":
     subprocess.call(["echo","You need to manually log in, the setup will continue once it detecs a valid login"])
-    subprocess.call(["echo","docker exec -it "+CONTAINER_ID+" /bin/bash /steamcmd/steamcmd.sh +login "+os.environ["STEAM_USER"]+" +quit"])
+    subprocess.call(["echo","docker exec -it "+CONTAINER_ID+" /bin/bash " + os.environ["STEAMCMDDIR"] + "/steamcmd.sh +login "+os.environ["STEAM_USER"]+" +quit"])
 
-
-while (USER == "anonymous"):
+while (STEAMUSER == "anonymous"):
     sleep(10)
-    USER = checkUSER()
+    STEAMUSER = checkUSER()
 
 subprocess.call(["echo", "Login data found, commencing with startup"])
 
-# Install Arma
+## Install Arma
 
-steamcmd = ["/steamcmd/steamcmd.sh"]
+steamcmd = [os.environ["STEAMCMDDIR"] + "/steamcmd.sh"]
 steamcmd.extend(["+force_install_dir", "/arma3"])
 steamcmd.extend(["+login", os.environ["STEAM_USER"]])
-steamcmd.extend(["+app_update", "233780"])
+steamcmd.extend(["+app_update", os.environ["STEAM_APPID"]])
 if env_defined("STEAM_BRANCH"):
     steamcmd.extend(["-beta", os.environ["STEAM_BRANCH"]])
 if env_defined("STEAM_BRANCH_PASSWORD"):
@@ -68,7 +68,7 @@ if env_defined("STEAM_BRANCH_PASSWORD"):
 steamcmd.extend(["validate", "+quit"])
 subprocess.call(steamcmd)
 
-# Mods
+## Mods
 
 mods = []
 
@@ -78,17 +78,22 @@ if os.environ["MODS_PRESET"] != "":
 if os.environ["MODS_LOCAL"] == "true" and os.path.exists("mods"):
     mods.extend(local.mods("mods"))
 
-launch = "{} -limitFPS={} -world={} {} {}".format(
-    os.environ["ARMA_BINARY"],
+## Build launchopts
+
+launchopts = " -limitFPS={} -world={} {} {}".format(
     os.environ["ARMA_LIMITFPS"],
     os.environ["ARMA_WORLD"],
     os.environ["ARMA_PARAMS"],
     mod_param("mod", mods),
 )
 
+# Check if using Creator DLC
+
 if os.environ["ARMA_CDLC"] != "":
     for cdlc in os.environ["ARMA_CDLC"].split(";"):
-        launch += " -mod={}".format(cdlc)
+        launchopts += " -mod={}".format(cdlc)
+
+# Check if using headless clients and create configs if so
 
 clients = int(os.environ["HEADLESS_CLIENTS"])
 print("Headless Clients:", clients)
@@ -111,30 +116,39 @@ if clients != 0:
 
         with open("/tmp/arma3.cfg", "w") as tmp_config:
             tmp_config.write(data)
-        launch += ' -config="/tmp/arma3.cfg"'
+        launchopts += ' -config="/tmp/arma3.cfg"'
 
-    client_launch = launch
-    client_launch += " -client -connect=127.0.0.1"
+    client_launchopts = launchopts
+    client_launchopts += " -client -connect=127.0.0.1"
     if "password" in config_values:
-        client_launch += " -password={}".format(config_values["password"])
+        client_launchopts += " -password={}".format(config_values["password"])
 
     for i in range(0, clients):
-        hc_launch = client_launch + ' -name="{}-hc-{}"'.format(
+        hc_launchopts = client_launchopts + ' -name="{}-hc-{}"'.format(
             os.environ["ARMA_PROFILE"], i
         )
-        print("LAUNCHING ARMA CLIENT {} WITH".format(i), hc_launch)
-        subprocess.Popen(hc_launch, shell=True)
-
+        print("LAUNCHING ARMA CLIENT {} WITH".format(i), hc_launchopts)
+        subprocess.Popen(hc_launchopts, shell=True)
 else:
-    launch += ' -config="/arma3/configs/{}"'.format(CONFIG_FILE)
+    launchopts += ' -config="/arma3/configs/{}"'.format(CONFIG_FILE)
 
-launch += ' -port={} -name="{}" -profiles="/arma3/configs/profiles"'.format(
+# Add ports and profiles config to launchopts
+
+launchopts += ' -port={} -name="{}" -profiles="/arma3/configs/profiles"'.format(
     os.environ["PORT"], os.environ["ARMA_PROFILE"]
 )
 
-if os.path.exists("servermods"):
-    launch += mod_param("serverMod", local.mods("servermods"))
+# Load servermods if exists
 
-print("LAUNCHING ARMA SERVER WITH", launch, flush=True)
-launch += ' | tee /arma3/startup.log'
-os.system(launch)
+if os.path.exists("servermods"):
+    launchopts += mod_param("serverMod", local.mods("servermods"))
+
+# Launch ArmA Server
+print("LAUNCHING ARMA SERVER WITH", launchopts, flush=True)
+armaprocess = subprocess.Popen([os.environ["ARMA_BINARY"], launchopts])
+try:
+    armaprocess.wait()
+except KeyboardInterrupt:
+    subprocess.call(["echo", "Shutting down"])
+    armaprocess.terminate()
+    raise

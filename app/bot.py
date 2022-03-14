@@ -9,7 +9,6 @@ def env_defined(key):
     return key in os.environ and len(os.environ[key]) > 0
 
 
-
 DISCORD_CHANNEL = []
 # env variables are defaults, if no config file exists it'll be created.
 # If no env is set, stop the bot
@@ -139,3 +138,4 @@ async def _update(ctx, *args):
     await ctx.message.delete()
 
 bot.run(DISCORD_TOKEN)
+

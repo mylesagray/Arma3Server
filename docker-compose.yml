@@ -1,13 +1,9 @@
-version: '2.2'
+version: '3.7'
 services:
   arma3:
     image: ghcr.io/mylesagray/arma3-server:latest
     network_mode: host
     volumes:
-      - './missions:/arma3/mpmissions'
-      - './configs:/arma3/configs'
-      - './mods:/arma3/mods'
-      - './servermods:/arma3/servermods'
-      - './workshop:/arma3/steamapps/workshop'
+      - './arma3:/arma3'
     env_file: .env
     restart: unless-stopped
