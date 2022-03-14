@@ -102,16 +102,16 @@ async def _delete(ctx, *arg):
     server = str(ctx.guild)
     channel = ctx.channel.id
     if server in settings["DISCORD_SERVER"]:
-        for chan in settings["DISCORD_SERVER"][server]["channels"]:
+        if channel in settings["DISCORD_SERVER"][server]["channels"]:
             try:
                 idx = settings["DISCORD_SERVER"][server]["channels"].index(channel)
                 settings["DISCORD_SERVER"][server]["channels"].remove(channel)
-                msg = channel.fetch_message(settings["DISCORD_SERVER"][server]["msgids"][idx])
-                await msg.delete()
-                del settings["DISCORD_SERVER"][server]["msgids"][idx]
+                msg = await bot.get_channel(channel).fetch_message(settings["DISCORD_SERVER"][server]["msgids"][idx])
+                del(settings["DISCORD_SERVER"][server]["msgids"][idx])
                 response = "Channel removed"
-            except:
-                pass
+                await msg.delete()
+            except Exception as e:
+                print(e)
     res = save_settings(settings)
     if not res:
         response = "Saving the settings failed, call an adult"
@@ -134,7 +134,8 @@ async def _update(ctx, *args):
         for channel in settings["DISCORD_SERVER"][server]["channels"]:
             chan = bot.get_channel(channel)
             message = await chan.fetch_message(settings["DISCORD_SERVER"][server]["msgids"][cnt])
-            await message.edit(content="Arma3server status",embed=embed)
+            await message.edit(content="",embed=embed)
             cnt += 1
+    await ctx.message.delete()
 
 bot.run(DISCORD_TOKEN)
