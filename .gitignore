@@ -8,8 +8,10 @@ arma3/mpmissions/*.pbo
 !arma3/configs
 arma3/configs/*
 !arma3/configs/basic.cfg
-!arma3/workshop
-arma3/workshop/*
+!arma3/steamapps
+arma3/steamapps/*
+!arma3/steamapps/workshop
+arma3/steamapps/workshop/*
 !arma3/mods
 arma3/mods/*
 !arma3/servermods
