@@ -89,7 +89,7 @@ async def _setup(ctx, *arg):
     res = await ctx.send(response)
     if res.id not in settings["DISCORD_SERVER"][server]["msgids"]:
         settings["DISCORD_SERVER"][server]["msgids"].append(res.id)
-        await ctx.pin()
+        #bot.get_channel(channel).fetch_message(res.id).pin()
     res = save_settings(settings)
     if not res:
         response = "Saving the settings failed, call an adult"
@@ -127,6 +127,7 @@ async def _update(ctx, *args):
     cnt = 0
     embed = messageConstructor()
     for server in settings["DISCORD_SERVER"]:
+        cnt = 0
         for channel in settings["DISCORD_SERVER"][server]["channels"]:
             chan = bot.get_channel(channel)
             message = await chan.fetch_message(settings["DISCORD_SERVER"][server]["msgids"][cnt])
