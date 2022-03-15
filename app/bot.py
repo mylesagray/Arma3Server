@@ -124,11 +124,8 @@ async def _update(ctx, *args):
     # No servers configured = no need to process further
     if "DISCORD_SERVER" not in settings:
         return
-    status = update.get_install_state()
-    version = update.get_version()
-    embed = discord.Embed(type="rich")
-    embed.add_field(name="Server status", value=status, inline=True)
-    embed.add_field(name="Server version", value=version, inline=True)
+    cnt = 0
+    embed = messageConstructor()
     for server in settings["DISCORD_SERVER"]:
         cnt = 0
         for channel in settings["DISCORD_SERVER"][server]["channels"]:
@@ -138,5 +135,25 @@ async def _update(ctx, *args):
             cnt += 1
     await ctx.message.delete()
 
+@bot.command(name="status")
+async def _status(ctx, *args):
+    embed = messageConstructor()
+    await ctx.message.delete()
+    await ctx.send(content="(delete in 60sec)", embed=embed, delete_after=60)
+    
+
+@bot.command(name="ping")
+async def _ping(ctx, *args):
+    await ctx.send("pong 🏓")
+    
+# returns the embed that we send
+def messageConstructor():
+    status = update.get_install_state()
+    version = update.get_version()
+    embed = discord.Embed(type="rich")
+    embed.add_field(name="Server status", value=status, inline=True)
+    embed.add_field(name="Server version", value=version, inline=True)
+    return embed
+    
 bot.run(DISCORD_TOKEN)
 
