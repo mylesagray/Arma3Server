@@ -3,6 +3,7 @@ import os
 import discord
 import update
 import json
+import datetime
 from discord.ext import commands
 
 def env_defined(key):
@@ -145,7 +146,7 @@ async def _status(ctx, *args):
 @bot.command(name="ping")
 async def _ping(ctx, *args):
     await ctx.send("pong 🏓")
-    
+
 # returns the embed that we send
 def messageConstructor():
     status = update.get_install_state()
@@ -153,7 +154,8 @@ def messageConstructor():
     embed = discord.Embed(type="rich")
     embed.add_field(name="Server status", value=status, inline=True)
     embed.add_field(name="Server version", value=version, inline=True)
+    embed.timestamp = datetime.datetime.utcnow()
     return embed
-    
+
 bot.run(DISCORD_TOKEN)
 
