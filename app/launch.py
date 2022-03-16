@@ -153,5 +153,6 @@ try:
     logfile.close()
 except KeyboardInterrupt:
     subprocess.call(["echo", "Shutting down"])
-    armaprocess.terminate()
+    armaprocess.send_signal(signal.SIGINT)
+    armaprocess.wait()
     raise

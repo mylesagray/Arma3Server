@@ -151,9 +151,12 @@ async def _ping(ctx, *args):
 def messageConstructor():
     status = update.get_install_state()
     version = update.get_version()
+    server_name, server_password = update.get_server_details()
     embed = discord.Embed(type="rich")
+    embed.add_field(name="Server name", value=server_name, inline=True)
     embed.add_field(name="Server status", value=status, inline=True)
     embed.add_field(name="Server version", value=version, inline=True)
+    embed.add_field(name="Server password", value=server_password, inline=True)
     embed.timestamp = datetime.datetime.utcnow()
     return embed
 

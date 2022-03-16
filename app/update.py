@@ -6,6 +6,7 @@ import json
 from datetime import datetime, date, timedelta
 
 LOG_FILE="/arma3/startup.log"
+CONFIG_FILE = os.environ["ARMA_CONFIG"]
 
 def env_defined(key):
     return key in os.environ and len(os.environ[key]) > 0
@@ -41,3 +42,28 @@ def get_version():
   if res:
     version = res.group(1)
   return version
+
+def get_server_details():
+  server_name = "undefined"
+  server_password = "undefined"
+  with open("/arma3/configs/{}".format(CONFIG_FILE)) as config:
+    data = config.read()
+    regex = r"(.+?)(?:\s+)?=(?:\s+)?(.+?)(?:$|\/|;)"
+
+    config_values = {}
+
+    matches = re.finditer(regex, data, re.MULTILINE)
+    for matchNum, match in enumerate(matches, start=1):
+        config_values[match.group(1).lower()] = match.group(2)
+
+    if "hostname" in config_values:
+        server_name = config_values["hostname"]
+        if server_name.startswith('"') and server_name.endswith('"'):
+            server_name = server_name[1:-1]
+
+    if "password" in config_values:
+        server_password = config_values["password"]
+        if server_password.startswith('"') and server_password.endswith('"'):
+            server_password = server_password[1:-1]
+
+  return server_name, server_password
