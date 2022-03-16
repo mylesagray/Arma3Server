@@ -1,3 +1,5 @@
+[![Publish Image](https://github.com/mylesagray/Arma3Server/actions/workflows/publish.yml/badge.svg)](https://github.com/mylesagray/Arma3Server/actions/workflows/publish.yml)
+
 # Arma 3 Dedicated Server
 
 This is a docker image for hosting an Arma 3 dedicated server. It is forked from [BrettMayson's image](https://github.com/brettmayson/arma3server), with some changes made by me to fix a couple of issues I was having with it, as well as making modification of the basic.cfg settings a little bit easier.
