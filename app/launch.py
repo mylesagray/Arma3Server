@@ -145,10 +145,12 @@ if os.path.exists("servermods"):
 
 # Launch ArmA Server
 print("LAUNCHING ARMA SERVER WITH", launchopts, flush=True)
+logfile = open('/arma3/startup.log', 'w')
 botprocess = subprocess.Popen(["python3", "/app/bot.py"])
-armaprocess = subprocess.Popen([os.environ["ARMA_BINARY"], launchopts])
+armaprocess = subprocess.Popen([os.environ["ARMA_BINARY"], launchopts], stdout=logfile, stderr=logfile)
 try:
     armaprocess.wait()
+    logfile.close()
 except KeyboardInterrupt:
     subprocess.call(["echo", "Shutting down"])
     armaprocess.terminate()
