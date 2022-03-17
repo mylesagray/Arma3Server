@@ -164,9 +164,9 @@ async def _mods(ctx, *args):
 
 # returns the embed that we send
 def messageConstructor():
-    status = await update.get_install_state()
-    version = await update.get_version()
-    server_name, server_password = await update.get_server_details()
+    status = update.get_install_state()
+    version = update.get_version()
+    server_name, server_password = update.get_server_details()
     embed = discord.Embed(type="rich",colour=discord.Colour.blurple())
     embed.title = "ArmA Server Status"
     embed.description = "The currently active ArmA server details are below"
