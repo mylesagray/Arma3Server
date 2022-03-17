@@ -147,16 +147,34 @@ async def _status(ctx, *args):
 async def _ping(ctx, *args):
     await ctx.send("pong 🏓")
 
+@bot.command(name="mods")
+async def _mods(ctx, *args):
+    await ctx.message.delete()
+    if os.environ["MODS_PRESET"] != "":
+        try:
+            modfile = open(os.environ["MODS_PRESET"],"rb")
+            fileupload = discord.File(fp=modfile,filename="mod-list.html")
+            modfile.close()
+            await ctx.send(content="(delete in 60sec)", file=fileupload, delete_after=60)
+        except Exception as e:
+            print(e)
+            await ctx.send("Something went wrong reading the file, call an adult")
+    else:
+        await ctx.send("No mod file defined, maybe you're running non-workshop mods?")
+
 # returns the embed that we send
 def messageConstructor():
-    status = update.get_install_state()
-    version = update.get_version()
-    server_name, server_password = update.get_server_details()
+    status = await update.get_install_state()
+    version = await update.get_version()
+    server_name, server_password = await update.get_server_details()
     embed = discord.Embed(type="rich",colour=discord.Colour.blurple())
-    embed.add_field(name="Server name", value=server_name, inline=True)
-    embed.add_field(name="Server status", value=status, inline=True)
-    embed.add_field(name="Server version", value=version, inline=True)
-    embed.add_field(name="Server password", value=server_password, inline=True)
+    embed.title = "ArmA Server Status"
+    embed.description = "The currently active ArmA server details are below"
+    embed.set_thumbnail(url="https://arma3.com/assets/img/logos/arma3.png")
+    embed.add_field(name="💻Server Name:", value=server_name)
+    embed.add_field(name="🔑Password:", value=server_password)
+    embed.add_field(name="📃Status:", value=status, inline=True)
+    embed.add_field(name="💥Version:", value=version, inline=True)
     embed.timestamp = datetime.datetime.utcnow()
     return embed
 
