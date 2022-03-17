@@ -25,7 +25,7 @@ We removed the need to statically pass in the password via env vars, and accomod
         -e ARMA_CONFIG=main.cfg \
         -e STEAM_USER=myusername \
         -e ARMA_BASIC=basic.cfg \
-        mylesagray/arma3-server
+        ghcr.io/mylesagray/arma3-server
 ```
 
 ### docker-compose
