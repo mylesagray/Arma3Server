@@ -17,7 +17,7 @@ if not env_defined("DISCORD_TOKEN"):
     print("Missing bot token from .env")
     exit()
 
-
+DISCORD_TOKEN=os.environ["DISCORD_TOKEN"]
 DISCORD_CONFIG = "/arma3/configs/discord.cfg"
 
 # tries to load an existing DISCORD_CONFIG, creates one on initial startup. 
