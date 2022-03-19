@@ -11,14 +11,16 @@ We removed the need to statically pass in the password via env vars, and accomod
 ### Docker CLI
 
 ```s
-    docker create \
+    docker run \
+        --name arma3server \
         -p 2302:2302/udp \
         -p 2303:2303/udp \
         -p 2304:2304/udp \
         -p 2305:2305/udp \
         -p 2306:2306/udp \
         -v path/to/arma3:/arma3/ \
-        --env-file ".env"
+        --env-file ".env" \
+        --restart unless-stopped \
         ghcr.io/mylesagray/arma3-server
 ```
 
