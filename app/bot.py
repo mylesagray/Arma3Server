@@ -97,13 +97,13 @@ async def _setup(ctx, *arg):
     res = await ctx.send(response)
     if res.id not in settings["DISCORD_SERVER"][server]["msgids"]:
         settings["DISCORD_SERVER"][server]["msgids"].append(res.id)
-        ctx.channel.pin(res)
+        await res.pin()
     res = save_settings(settings)
     if not res:
         response = "Saving the settings failed, call an adult"
-        ctx.send(response)
+        await ctx.send(response)
     if res:
-        _update()
+        await _update(ctx)
 
 # Removes the channel this was called in from the list of channels to !update
 @bot.command(name="delete")
