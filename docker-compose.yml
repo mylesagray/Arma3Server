@@ -2,8 +2,15 @@ version: '3.7'
 services:
   arma3:
     image: ghcr.io/mylesagray/arma3-server:latest
-    network_mode: host
+    ports:
+        - "2302:2302/udp" 
+        - "2303:2303/udp"
+        - "2304:2304/udp"
+        - "2305:2305/udp"
+        - "2306:2306/udp"
     volumes:
       - './arma3:/arma3'
+      # Uncomment if you want to persistently store login data
+      #- './userdata:/home/steam/Steam'
     env_file: .env
     restart: unless-stopped
