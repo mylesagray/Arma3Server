@@ -13,10 +13,8 @@ def env_defined(key):
 DISCORD_CHANNEL = []
 # env variables are defaults, if no config file exists it'll be created.
 # If no env is set, stop the bot
-try:
-    DISCORD_TOKEN = os.environ["DISCORD_TOKEN"]
-except:
-    print("Missing token")
+if not env_defined("DISCORD_TOKEN"):
+    print("Missing bot token from .env")
     exit()
 
 
