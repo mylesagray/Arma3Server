@@ -28,7 +28,7 @@ if not os.path.isdir(KEYS):
         os.remove(KEYS)
     os.makedirs(KEYS)
 
-# check if there's a userdata folder other than anonymous, if it exists there  is login data,
+# check if there's a userdata folder other than anonymous, if it exists there is login data,
 # if not this script will NOT try to log in further until you log in manually
 # this is required for proper 2FA and also to never store your password in ENV
 
