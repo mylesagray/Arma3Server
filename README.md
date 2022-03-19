@@ -24,7 +24,7 @@ We removed the need to statically pass in the password via env vars, and accomod
 
 ### docker-compose
 
-Use the docker-compose.yml file inside a folder. It will automatically create 4 folders in which the missions, configs, mods and servermods can be loaded.
+Use the docker-compose.yml file inside a folder. It will automatically create an "arma3" folder in which the missions, configs, mods and servermods can be loaded into their respective subfolders.
 
 Copy the `.env.example` file to `.env`, containing at least `STEAM_USER`.
 
