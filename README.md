@@ -30,6 +30,8 @@ Use the docker-compose.yml file inside a folder. It will automatically create an
 
 Copy the `.env.example` file to `.env`, containing at least `STEAM_USER`.
 
+Rename `arma3/configs/main.cfg.example` to `main.cfg` and configure it to your liking.
+
 Use `docker-compose start` to start the server.
 
 Use `docker-compose logs` to see server logs.
@@ -107,3 +109,7 @@ Set the environment variable `MODS_PRESET` to the HTML preset file exported from
 `-e MODS_PRESET="my_mods.html"`
 
 `-e MODS_PRESET="http://example.com/my_mods.html"`
+
+## Discord bot
+
+To use the discord bot and get status updates in your preferred server and channel, you need to create an Application in Discords [Developer Portal](https://discord.com/developers/applications). After doing so you need to create a bot for that application and copy the created Token into your .envs `DISCORD_TOKEN`. Now head over to `OAuth2\URL Generator` and create a URL asking for `bot` permissions `Read Messages/View Channels`, `Send Messages` and `Manage Messages`. Via the generated url you can now invite the bot to your preferred server.

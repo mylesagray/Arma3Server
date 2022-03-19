@@ -13,3 +13,7 @@ passwordAdmin = "passwordAdmin"; // Password to become server admin. When you're
 serverCommandPassword = "";
 admins[] = {"123"}; //add arma3 profile id to add default admins
 logFile = "server_console.log"; // Tells ArmA-server where the logfile should go and what it should be called
+
+
+// If you want to play with mods, BattlEye can and probably will break your game
+// BattlEye=0;
