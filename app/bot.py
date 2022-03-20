@@ -13,14 +13,15 @@ def env_defined(key):
 DISCORD_CHANNEL = []
 # env variables are defaults, if no config file exists it'll be created.
 # If no env is set, stop the bot
-try:
-    DISCORD_TOKEN = os.environ["DISCORD_TOKEN"]
-except:
-    print("Missing token")
+if not env_defined("DISCORD_TOKEN"):
+    print("Missing bot token from .env")
     exit()
 
+DISCORD_TOKEN=os.environ["DISCORD_TOKEN"]
 DISCORD_CONFIG = "/arma3/configs/discord.cfg"
 
+# tries to load an existing DISCORD_CONFIG, creates one on initial startup. 
+# Fails if the path isn't writeable
 def load_settings():
     try:
         f = open(DISCORD_CONFIG,'r')
@@ -51,11 +52,16 @@ def save_settings(jsonString):
     return 1
 
 desc = '''Arma3 server status bot:
-!setup - add this channel to update notification list
-!delete - removes this channel from update notification list'''
+!setup - Adds a message to this channel that will be updated by !update //TODO: implement cron feature
+!delete - Removes the message created by !setup
+!status - Sends a self deleting status message with all available server info
+!update - Updates the pinned message from !setup
+!mods - Sends a self deleting message with the currently used mod-list as html file
+!ping - Alive check'''
 
 bot = commands.Bot(command_prefix='!', description=desc)
 
+# mostly for debugging purposes
 @bot.command(name="get")
 async def _get(ctx, arg):
     response = desc
@@ -65,6 +71,7 @@ async def _get(ctx, arg):
         response = update.get_install_state()
     await ctx.send(response)
 
+# Adds a message to the channel that it was executed in, pins it and stores the id for !update
 @bot.command(name="setup")
 async def _setup(ctx, *arg):
     response = ""
@@ -90,13 +97,15 @@ async def _setup(ctx, *arg):
     res = await ctx.send(response)
     if res.id not in settings["DISCORD_SERVER"][server]["msgids"]:
         settings["DISCORD_SERVER"][server]["msgids"].append(res.id)
-        #bot.get_channel(channel).fetch_message(res.id).pin()
+        await res.pin()
     res = save_settings(settings)
     if not res:
         response = "Saving the settings failed, call an adult"
-        ctx.send(response)
+        await ctx.send(response)
+    if res:
+        await _update(ctx)
 
-
+# Removes the channel this was called in from the list of channels to !update
 @bot.command(name="delete")
 async def _delete(ctx, *arg):
     response = "Channel not monitored"
@@ -118,13 +127,14 @@ async def _delete(ctx, *arg):
         response = "Saving the settings failed, call an adult"
     await ctx.send(response)
 
-
+# updates the pinned messages created via !setup
 @bot.command(name="update")
 async def _update(ctx, *args):
     response = ""
     # No servers configured = no need to process further
     if "DISCORD_SERVER" not in settings:
         return
+    await ctx.message.delete()
     cnt = 0
     embed = messageConstructor()
     for server in settings["DISCORD_SERVER"]:
@@ -134,19 +144,20 @@ async def _update(ctx, *args):
             message = await chan.fetch_message(settings["DISCORD_SERVER"][server]["msgids"][cnt])
             await message.edit(content="",embed=embed)
             cnt += 1
-    await ctx.message.delete()
 
+# Sends a self deleting status message with all available server info
 @bot.command(name="status")
 async def _status(ctx, *args):
-    embed = messageConstructor()
     await ctx.message.delete()
+    embed = messageConstructor()
     await ctx.send(content="(delete in 60sec)", embed=embed, delete_after=60)
     
-
+# Alive check
 @bot.command(name="ping")
 async def _ping(ctx, *args):
     await ctx.send("pong 🏓")
 
+# Sends a self deleting message with the currently used mod-list as html file
 @bot.command(name="mods")
 async def _mods(ctx, *args):
     await ctx.message.delete()
@@ -162,7 +173,7 @@ async def _mods(ctx, *args):
     else:
         await ctx.send("No mod file defined, maybe you're running non-workshop mods?")
 
-# returns the embed that we send
+# Constructs an embed for !update and !status
 def messageConstructor():
     status = update.get_install_state()
     version = update.get_version()

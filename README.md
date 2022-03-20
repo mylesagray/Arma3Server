@@ -11,28 +11,26 @@ We removed the need to statically pass in the password via env vars, and accomod
 ### Docker CLI
 
 ```s
-    docker create \
-        --name=arma-server \
+    docker run \
+        --name arma3server \
         -p 2302:2302/udp \
         -p 2303:2303/udp \
         -p 2304:2304/udp \
         -p 2305:2305/udp \
         -p 2306:2306/udp \
-        -v path/to/missions:/arma3/mpmissions \
-        -v path/to/configs:/arma3/configs \
-        -v path/to/mods:/arma3/mods \
-        -v path/to/servermods:/arma3/servermods \
-        -e ARMA_CONFIG=main.cfg \
-        -e STEAM_USER=myusername \
-        -e ARMA_BASIC=basic.cfg \
+        -v path/to/arma3:/arma3/ \
+        --env-file ".env" \
+        --restart unless-stopped \
         ghcr.io/mylesagray/arma3-server
 ```
 
 ### docker-compose
 
-Use the docker-compose.yml file inside a folder. It will automatically create 4 folders in which the missions, configs, mods and servermods can be loaded.
+Use the docker-compose.yml file inside a folder. It will automatically create an "arma3" folder in which the missions, configs, mods and servermods can be loaded into their respective subfolders.
 
-Copy the `.env.example` file to `.env`, containing at least `STEAM_USER` and `STEAM_PASSWORD`.
+Copy the `.env.example` file to `.env`, containing at least `STEAM_USER`.
+
+Rename `arma3/configs/main.cfg.example` to `main.cfg` and configure it to your liking.
 
 Use `docker-compose start` to start the server.
 
@@ -53,10 +51,7 @@ Profiles are saved in `/arma3/configs/profiles`
 | Parameter                     | Function                                                  | Default |
 | -------------                 |--------------                                             | - |
 | `-p 2302-2306`                | Ports required by Arma 3 |
-| `-v /arma3/mpmission`         | Folder with MP Missions |
-| `-v /arma3/configs`           | Folder containing config files |
-| `-v /arma3/mods`              | Mods that will be loaded by clients |
-| `-v /arma3/servermods`        | Mods that will only be loaded by the server |
+| `-v /arma3`                   | Folder containing Arma 3 files |
 | `-e PORT`                     | Port used by the server, (uses PORT to PORT+3)            | 2302 |
 | `-e ARMA_BINARY`              | Arma 3 server binary to use, `./arma3server_x64` for x64   | `./arma3server` |
 | `-e ARMA_CONFIG`              | Config file to load from `/arma3/configs`                 | `main.cfg` |
@@ -72,7 +67,9 @@ Profiles are saved in `/arma3/configs/profiles`
 | `-e MODS_PRESET`              | An Arma 3 Launcher preset to load |
 | `-e BASIC_CONFIG`             | Basic config file to load from `arma3/configs`            |`basic.cfg` |
 
-List of Steam branches can be found on the Community Wiki, [Arma 3: Steam Branches](https://community.bistudio.com/wiki/Arma_3:_Steam_Branches)
+List of Steam branches can be found on the Community Wiki, [Arma 3: Steam Branches](https://community.bistudio.com/wiki/Arma_3:_Steam_Branches).
+
+If you change the steamPort in `main.cfg` to something non-default change your docker ports command according to [this](https://community.bistudio.com/wiki/Arma_3:_Dedicated_Server#Port_Forwarding) official wiki entry.
 
 ## Creator DLC
 
@@ -99,7 +96,7 @@ There is a bug in the S.O.G. Prairie Fire CDLC which causes headless clients to 
 
 ### Local
 
-1. Place the mods inside `/mods` or `/servermods`.
+1. Place the mods inside `arma3/mods` or `arma3/servermods`.
 2. Be sure that the mod folder is all lowercase and does not show up with quotation marks around it when listing the directory eg `'@ACE(v2)'`
 3. Run the following command from the mods and/or servermods directory to confirm that all the files are lowercase.
     `find . -depth -exec rename 's/(.*)\/([^\/]*)/$1\/\L$2/' {} \;`
@@ -109,8 +106,16 @@ There is a bug in the S.O.G. Prairie Fire CDLC which causes headless clients to 
 
 ### Workshop
 
-Set the environment variable `MODS_PRESET` to the HTML preset file exported from the Arma 3 Launcher. The path can be local file or a URL. A volume can be created at `/arma3/steamapps/workshop/content/107410` to preserve the mods between containers.
+Set the environment variable `MODS_PRESET` to the HTML preset file exported from the Arma 3 Launcher. The path can be local file or a URL.
 
 `-e MODS_PRESET="my_mods.html"`
 
 `-e MODS_PRESET="http://example.com/my_mods.html"`
+
+## Discord bot
+
+To use the discord bot and get status updates in your preferred server and channel, you need to create an Application in Discords [Developer Portal](https://discord.com/developers/applications). 
+
+After doing so you need to create a bot for that application and copy the created Token into your .envs `DISCORD_TOKEN`. Now head over to `OAuth2\URL Generator` and create a URL asking for `bot` permissions `Read Messages/View Channels`, `Send Messages` and `Manage Messages`. 
+
+Via the generated url you can now invite the bot to your preferred server, check out the provided functions using `!help
