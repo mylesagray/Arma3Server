@@ -67,7 +67,9 @@ Profiles are saved in `/arma3/configs/profiles`
 | `-e MODS_PRESET`              | An Arma 3 Launcher preset to load |
 | `-e BASIC_CONFIG`             | Basic config file to load from `arma3/configs`            |`basic.cfg` |
 
-List of Steam branches can be found on the Community Wiki, [Arma 3: Steam Branches](https://community.bistudio.com/wiki/Arma_3:_Steam_Branches)
+List of Steam branches can be found on the Community Wiki, [Arma 3: Steam Branches](https://community.bistudio.com/wiki/Arma_3:_Steam_Branches).
+
+If you change the steamPort in `main.cfg` to something non-default change your docker ports command according to [this](https://community.bistudio.com/wiki/Arma_3:_Dedicated_Server#Port_Forwarding) official wiki entry.
 
 ## Creator DLC
 

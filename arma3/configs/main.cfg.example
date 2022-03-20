@@ -3,8 +3,7 @@
 //
 
 // STEAM PORTS
-steamPort = 2304;
-steamQueryPort = 2303;
+steamPort = 2302;
 
 // GLOBAL SETTINGS
 hostname = "hostname"; // The name of the server that shall be displayed in the public server list
