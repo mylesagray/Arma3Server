@@ -114,4 +114,8 @@ Set the environment variable `MODS_PRESET` to the HTML preset file exported from
 
 ## Discord bot
 
-To use the discord bot and get status updates in your preferred server and channel, you need to create an Application in Discords [Developer Portal](https://discord.com/developers/applications). After doing so you need to create a bot for that application and copy the created Token into your .envs `DISCORD_TOKEN`. Now head over to `OAuth2\URL Generator` and create a URL asking for `bot` permissions `Read Messages/View Channels`, `Send Messages` and `Manage Messages`. Via the generated url you can now invite the bot to your preferred server.
+To use the discord bot and get status updates in your preferred server and channel, you need to create an Application in Discords [Developer Portal](https://discord.com/developers/applications). 
+
+After doing so you need to create a bot for that application and copy the created Token into your .envs `DISCORD_TOKEN`. Now head over to `OAuth2\URL Generator` and create a URL asking for `bot` permissions `Read Messages/View Channels`, `Send Messages` and `Manage Messages`. 
+
+Via the generated url you can now invite the bot to your preferred server, check out the provided functions using `!help
