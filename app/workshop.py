@@ -9,11 +9,12 @@ WORKSHOP = "steamapps/workshop/content/107410/"
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36"  # noqa: E501
 
 
-def mod(id):
+def mod(ids):
     steamcmd = [os.environ["STEAMCMDDIR"] + "/steamcmd.sh"]
     steamcmd.extend(["+force_install_dir", "/arma3"])
     steamcmd.extend(["+login", os.environ["STEAM_USER"]])
-    steamcmd.extend(["+workshop_download_item", "107410", id])
+    for id in ids:
+        steamcmd.extend(["+workshop_download_item", "107410", id])
     steamcmd.extend(["+quit"])
     subprocess.call(steamcmd)
 
@@ -33,9 +34,11 @@ def preset(mod_file):
         html = f.read()
         regex = r"filedetails\/\?id=(\d+)\""
         matches = re.finditer(regex, html, re.MULTILINE)
+        ids = []
         for _, match in enumerate(matches, start=1):
-            mod(match.group(1))
+            ids.append(match.group(1))
             moddir = WORKSHOP + match.group(1)
             mods.append(moddir)
             keys.copy(moddir)
+        mod(ids)
     return mods
