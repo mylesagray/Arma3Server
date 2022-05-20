@@ -32,7 +32,7 @@ RUN set -x \
         python3 \
         python3-dev \
         python3-pip \
-        lib32gcc1 \
+        lib32gcc-s1 \
         build-essential \
     && apt-get remove --purge -y \
     && apt-get clean autoclean \
