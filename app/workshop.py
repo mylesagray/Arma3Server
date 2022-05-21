@@ -21,6 +21,7 @@ def mod(ids):
     # steamcmd returns 10 for errors like timeouts
     while res != 0:
         res = subprocess.call(steamcmd)
+        subprocess.call(["/bin/cp","-a","/arma3/steamapps/workshop/downloads/107410/.","/arma3/steamapps/workshop/content/107410/"])
 
 
 def preset(mod_file):

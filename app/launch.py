@@ -146,6 +146,7 @@ if os.path.exists("servermods"):
 # Launch ArmA Server
 print("LAUNCHING ARMA SERVER WITH", launchopts, flush=True)
 logfile = open('/arma3/startup.log', 'w')
+subprocess.call(["/bin/bash", "/app/mods.sh"])
 botprocess = subprocess.Popen(["python3", "/app/bot.py"])
 armaprocess = subprocess.Popen([os.environ["ARMA_BINARY"], launchopts], stdout=logfile, stderr=logfile)
 try:

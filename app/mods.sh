@@ -1,2 +1,3 @@
 #!/bin/bash
-find /arma3/ -depth -exec rename 's/(.*)\/([^\/]*)/$1\/\L$2/' {} \;
+cd "/arma3/steamapps/workshop/content/107410/"
+find . -depth -exec rename -v -E 's/(.*)\/([^\/]*)/$1\/\L$2/' {} \;

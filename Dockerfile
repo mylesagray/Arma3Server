@@ -34,6 +34,7 @@ RUN set -x \
         python3-pip \
         lib32gcc-s1 \
         build-essential \
+        rename \
     && apt-get remove --purge -y \
     && apt-get clean autoclean \
     && apt-get autoremove -y \
