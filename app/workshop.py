@@ -15,8 +15,12 @@ def mod(ids):
     steamcmd.extend(["+login", os.environ["STEAM_USER"]])
     for id in ids:
         steamcmd.extend(["+workshop_download_item", "107410", id])
+        steamcmd.extend(["validate"])
     steamcmd.extend(["+quit"])
-    subprocess.call(steamcmd)
+    res = ""
+    # steamcmd returns 10 for errors like timeouts
+    while res != 0:
+        res = subprocess.call(steamcmd)
 
 
 def preset(mod_file):
