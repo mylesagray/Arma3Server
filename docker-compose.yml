@@ -13,7 +13,8 @@ services:
         # - "2345:2345/tcp" # BattlEye - arma31.battleye.com 
     volumes:
       - './arma3:/arma3'
-      # Uncomment if you want to persistently store login data
+      # Uncomment if you want to persistently store login data, 
+      # ensure that it's owned by UID/GID 1000:1000
       # - './userdata:/home/steam/Steam'
     env_file: .env
     restart: unless-stopped
