@@ -27,27 +27,27 @@ ENV PUID=1000 \
     STEAMCMDDIR="/home/steam/steamcmd"
 
 RUN set -x \
-	&& dpkg --add-architecture i386 \
+    && dpkg --add-architecture i386 \
     && apt-get update \
     && apt-get install -y --no-install-recommends --no-install-suggests \
         build-essential \
-		ca-certificates \
-		curl \
+        ca-certificates \
+        curl \
         lib32stdc++6 \
-		lib32gcc1 \
-		libsdl2-2.0-0:i386 \
-		locales \
-		nano \
+        lib32gcc1 \
+        libsdl2-2.0-0:i386 \
+        locales \
+        nano \
         python3 \
         python3-dev \
         python3-pip \
         rename \
-		wget \
+        wget \
     && sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
     && dpkg-reconfigure --frontend=noninteractive locales \
     && printenv \
     && useradd -u "${PUID}" -m "${USER}" \
-	&& su "${USER}" -c \
+    && su "${USER}" -c \
                 "mkdir -p \"${STEAMCMDDIR}\" \
                 && wget -qO- 'https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz' | tar xvzf - -C \"${STEAMCMDDIR}\" \
                 && \"./${STEAMCMDDIR}/steamcmd.sh\" +quit \
@@ -55,8 +55,8 @@ RUN set -x \
                 && ln -s \"${STEAMCMDDIR}/linux32/steamclient.so\" \"${HOMEDIR}/.steam/sdk32/steamclient.so\" \
                 && ln -s \"${STEAMCMDDIR}/linux32/steamcmd\" \"${STEAMCMDDIR}/linux32/steam\" \
                 && ln -s \"${STEAMCMDDIR}/steamcmd.sh\" \"${STEAMCMDDIR}/steam.sh\"" \
-	&& ln -s "${STEAMCMDDIR}/linux32/steamclient.so" "/usr/lib/i386-linux-gnu/steamclient.so" \
-	&& ln -s "${STEAMCMDDIR}/linux64/steamclient.so" "/usr/lib/x86_64-linux-gnu/steamclient.so" \
+    && ln -s "${STEAMCMDDIR}/linux32/steamclient.so" "/usr/lib/i386-linux-gnu/steamclient.so" \
+    && ln -s "${STEAMCMDDIR}/linux64/steamclient.so" "/usr/lib/x86_64-linux-gnu/steamclient.so" \
     && apt-get remove --purge -y \
         wget \
         curl \
@@ -64,8 +64,8 @@ RUN set -x \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p "${STEAM_APPDIR}" \
-	&& chmod 755 "${STEAM_APPDIR}" \
-	&& chown -R "${USER}:${USER}" "${STEAM_APPDIR}" 
+    && chmod 755 "${STEAM_APPDIR}" \
+    && chown -R "${USER}:${USER}" "${STEAM_APPDIR}" 
 
 RUN python3 -m pip install -U discord.py
 
