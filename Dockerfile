@@ -66,7 +66,7 @@ RUN set -x \
     && chmod 755 "${STEAM_APPDIR}" \
     && chown -R "${USER}:${USER}" "${STEAM_APPDIR}" 
 
-RUN python3 -m pip install -U discord.py
+RUN python3 -m pip install -U py-cord
 
 # Add Tini
 ENV TINI_VERSION v0.19.0
