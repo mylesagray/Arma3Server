@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 LABEL org.opencontainers.image.authors="Myles Gray, Florian Linke"
 LABEL org.opencontainers.image.source='https://github.com/mylesagray/arma3server'
@@ -34,7 +34,7 @@ RUN set -x \
         ca-certificates \
         curl \
         lib32stdc++6 \
-        lib32gcc1 \
+        lib32gcc-s1 \
         libsdl2-2.0-0:i386 \
         locales \
         nano \
