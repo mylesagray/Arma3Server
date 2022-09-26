@@ -59,6 +59,9 @@ desc = '''Arma3 server status bot:
 !mods - Sends a self deleting message with the currently used mod-list as html file
 !ping - Alive check'''
 
+intents = discord.Intents.default()
+intents.message_content = True
+
 bot = commands.Bot(command_prefix='!', description=desc)
 
 # mostly for debugging purposes
