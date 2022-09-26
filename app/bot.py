@@ -62,7 +62,7 @@ desc = '''Arma3 server status bot:
 intents = discord.Intents.default()
 intents.message_content = True
 
-bot = commands.Bot(command_prefix='!', description=desc)
+bot = commands.Bot(command_prefix='!', description=desc, intents=intents)
 
 # mostly for debugging purposes
 @bot.command(name="get")
