@@ -43,6 +43,7 @@ RUN set -x \
         python3-pip \
         rename \
         wget \
+        procps \
     && sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
     && dpkg-reconfigure --frontend=noninteractive locales \
     && useradd -u "${PUID}" -m "${USER}" \
