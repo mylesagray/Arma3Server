@@ -89,17 +89,8 @@ async def _restart(ctx):
         await msg.clear_reactions()
         await ctx.send(f'Restart aborted')
     else:
-        subprocess.call(["/usr/bin/pkill", "arma3"])
+        subprocess.call(["/usr/bin/pkill", "-SIGINT", "arma3"])
         await ctx.send(f'Restarting server now')
-# mostly for debugging purposes
-@bot.command(name="get")
-async def _get(ctx, arg):
-    response = desc
-    if (arg == "version"):
-        response = update.get_version()
-    if (arg == "status"):
-        response = update.get_install_state()
-    await ctx.send(response)
 
 # Adds a message to the channel that it was executed in, pins it and stores the id for !update
 @bot.command(name="setup")
