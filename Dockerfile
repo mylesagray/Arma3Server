@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 LABEL org.opencontainers.image.authors="Myles Gray, Florian Linke"
 LABEL org.opencontainers.image.source='https://github.com/mylesagray/arma3server'
@@ -34,7 +34,7 @@ RUN set -x \
         ca-certificates \
         curl \
         lib32stdc++6 \
-        lib32gcc1 \
+        lib32gcc-s1 \
         libsdl2-2.0-0:i386 \
         locales \
         nano \
@@ -43,6 +43,7 @@ RUN set -x \
         python3-pip \
         rename \
         wget \
+        procps \
     && sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
     && dpkg-reconfigure --frontend=noninteractive locales \
     && useradd -u "${PUID}" -m "${USER}" \
@@ -66,7 +67,7 @@ RUN set -x \
     && chmod 755 "${STEAM_APPDIR}" \
     && chown -R "${USER}:${USER}" "${STEAM_APPDIR}" 
 
-RUN python3 -m pip install -U discord.py
+RUN python3 -m pip install -U py-cord
 
 # Add Tini
 ENV TINI_VERSION v0.19.0

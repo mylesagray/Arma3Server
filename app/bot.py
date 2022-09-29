@@ -1,10 +1,12 @@
 from email import message
 import os
+import subprocess
 import discord
 import update
 import json
 import datetime
 from discord.ext import commands
+from asyncio import TimeoutError
 
 def env_defined(key):
     return key in os.environ and len(os.environ[key]) > 0
@@ -57,19 +59,38 @@ desc = '''Arma3 server status bot:
 !status - Sends a self deleting status message with all available server info
 !update - Updates the pinned message from !setup
 !mods - Sends a self deleting message with the currently used mod-list as html file
-!ping - Alive check'''
+!ping - Alive check
+!restart - CAUTION: Restarts the server!'''
 
-bot = commands.Bot(command_prefix='!', description=desc)
+intents = discord.Intents.default()
+intents.message_content = True
 
-# mostly for debugging purposes
-@bot.command(name="get")
-async def _get(ctx, arg):
-    response = desc
-    if (arg == "version"):
-        response = update.get_version()
-    if (arg == "status"):
-        response = update.get_install_state()
-    await ctx.send(response)
+bot = commands.Bot(command_prefix='!', description=desc, intents=intents)
+
+@bot.event
+async def on_ready():
+    print('Logged on')
+
+@bot.command(name="restart")
+async def _restart(ctx):
+    embed = embed_constructor(
+        title='<:warning:1024796220222345216>WARNING<:warning:1024796220222345216>', 
+        text="This command will restart the running arma server without any further questions.\n\
+              If you're sure about that, react with <:elmo:1005177400105107507> within the next 5 seconds.")
+    msg = await ctx.send(embed=embed)
+    await msg.add_reaction("<:elmo:1005177400105107507>")
+    def check(reaction, user):
+        print(reaction)
+        print(user)
+        return user == ctx.author and str(reaction.emoji) == '<:elmo:1005177400105107507>'
+    try:
+        reaction, user = await bot.wait_for('reaction_add', timeout=5.0, check=check)
+    except TimeoutError:
+        await msg.clear_reactions()
+        await ctx.send(f'Restart aborted')
+    else:
+        subprocess.call(["/usr/bin/pkill", "-SIGINT", "arma3"])
+        await ctx.send(f'Restarting server now')
 
 # Adds a message to the channel that it was executed in, pins it and stores the id for !update
 @bot.command(name="setup")
@@ -187,6 +208,12 @@ def messageConstructor():
     embed.add_field(name="📃Status:", value=status, inline=True)
     embed.add_field(name="💥Version:", value=version, inline=True)
     embed.timestamp = datetime.datetime.utcnow()
+    return embed
+
+def embed_constructor(title: str, text: str) -> discord.Embed:
+    embed = discord.Embed(type="rich", colour=discord.Colour.red())
+    embed.title = title
+    embed.description = text
     return embed
 
 bot.run(DISCORD_TOKEN)
