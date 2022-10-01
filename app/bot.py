@@ -88,8 +88,6 @@ async def _restart(ctx):
     msg = await ctx.send(embed=embed)
     await msg.add_reaction("<:elmo:1005177400105107507>")
     def check(reaction, user):
-        print(reaction)
-        print(user)
         return user == ctx.author and str(reaction.emoji) == '<:elmo:1005177400105107507>'
     try:
         reaction, user = await bot.wait_for('reaction_add', timeout=5.0, check=check)
