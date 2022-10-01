@@ -19,6 +19,12 @@ if not env_defined("DISCORD_TOKEN"):
     print("Missing bot token from .env")
     exit()
 
+if env_defined("DISCORD_PREFIX"):
+    DISCORD_PREFIX=os.environ["DISCORD_PREFIX"]
+else:
+    print("No user defined prefix given, defaulting to '!'")
+    DISCORD_PREFIX="!"
+
 DISCORD_TOKEN=os.environ["DISCORD_TOKEN"]
 DISCORD_CONFIG = "/arma3/configs/discord.cfg"
 
@@ -31,7 +37,9 @@ def load_settings():
         f.close()
     except:
         try:
-            settings = {"DISCORD_TOKEN":DISCORD_TOKEN}
+            settings = {
+                "DISCORD_TOKEN": DISCORD_TOKEN
+            }
             with open(DISCORD_CONFIG, 'w', encoding='utf-8') as f:
                 json.dump(settings, f, ensure_ascii=False, indent=4)
         except:
@@ -65,7 +73,7 @@ desc = '''Arma3 server status bot:
 intents = discord.Intents.default()
 intents.message_content = True
 
-bot = commands.Bot(command_prefix='!', description=desc, intents=intents)
+bot = commands.Bot(command_prefix=DISCORD_PREFIX, description=desc, intents=intents)
 
 @bot.event
 async def on_ready():
