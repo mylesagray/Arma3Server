@@ -118,4 +118,4 @@ To use the discord bot and get status updates in your preferred server and chann
 
 After doing so you need to create a bot for that application and copy the created Token into your .envs `DISCORD_TOKEN`. Now head over to `OAuth2\URL Generator` and create a URL asking for `bot` permissions `Read Messages/View Channels`, `Send Messages` and `Manage Messages`. 
 
-Via the generated url you can now invite the bot to your preferred server, check out the provided functions using `!help
+Via the generated url you can now invite the bot to your preferred server, check out the provided functions using `!help`.
