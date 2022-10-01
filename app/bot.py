@@ -61,14 +61,14 @@ def save_settings(jsonString):
         return 0
     return 1
 
-desc = '''Arma3 server status bot:
-!setup - Adds a message to this channel that will be updated by !update //TODO: implement cron feature
-!delete - Removes the message created by !setup
-!status - Sends a self deleting status message with all available server info
-!update - Updates the pinned message from !setup
-!mods - Sends a self deleting message with the currently used mod-list as html file
-!ping - Alive check
-!restart - CAUTION: Restarts the server!'''
+desc = f'''Arma3 server status bot:
+{DISCORD_PREFIX}setup - Adds a message to this channel that will be updated by {DISCORD_PREFIX}update //TODO: implement cron feature
+{DISCORD_PREFIX}delete - Removes the message created by !setup
+{DISCORD_PREFIX}status - Sends a self deleting status message with all available server info
+{DISCORD_PREFIX}update - Updates the pinned message from !setup
+{DISCORD_PREFIX}mods - Sends a self deleting message with the currently used mod-list as html file
+{DISCORD_PREFIX}ping - Alive check
+{DISCORD_PREFIX}restart - CAUTION: Restarts the server!'''
 
 intents = discord.Intents.default()
 intents.message_content = True
