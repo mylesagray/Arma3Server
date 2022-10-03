@@ -67,8 +67,6 @@ RUN set -x \
     && chmod 755 "${STEAM_APPDIR}" \
     && chown -R "${USER}:${USER}" "${STEAM_APPDIR}" 
 
-RUN python3 -m pip install -U py-cord
-
 # Add Tini
 ENV TINI_VERSION v0.19.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
@@ -81,8 +79,11 @@ STOPSIGNAL SIGINT
 
 WORKDIR /app
 COPY app/ .
+RUN python3 -m pip install pipenv
+RUN python3 -m pipenv install --system --deploy
 
 WORKDIR /arma3
+
 CMD ["python3","/app/launch.py"]
 
 # Expose ports

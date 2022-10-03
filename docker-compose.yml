@@ -2,6 +2,7 @@ version: '3.7'
 services:
   arma3:
     image: ghcr.io/mylesagray/arma3-server:latest
+    build: .
     ports:
         - "2302:2302/udp" 
         - "2303:2303/udp" # Arma Server STEAM query port 
@@ -15,6 +16,6 @@ services:
       - './arma3:/arma3'
       # Uncomment if you want to persistently store login data, 
       # ensure that it's owned by UID/GID 1000:1000
-      # - './userdata:/home/steam/Steam'
+      - './userdata:/home/steam/Steam'
     env_file: .env
     restart: unless-stopped
