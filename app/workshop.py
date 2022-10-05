@@ -36,7 +36,7 @@ def preset(mod_file):
             f.write(remote.read())
         mod_file = "preset.html"
     mods = []
-    with open(mod_file, encoding=str) as f:
+    with open(mod_file) as f:
         html = f.read()
         regex = r"filedetails\/\?id=(\d+)\""
         matches = re.finditer(regex, html, re.MULTILINE)

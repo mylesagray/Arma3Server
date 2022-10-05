@@ -27,7 +27,7 @@ else:
     DISCORD_PREFIX = "!"
 
 DISCORD_TOKEN = os.environ["DISCORD_TOKEN"]
-DISCORD_CONFIG = "../arma3/configs/discord.cfg"
+DISCORD_CONFIG = "/arma3/configs/discord.cfg"
 
 # tries to load an existing DISCORD_CONFIG, creates one on initial startup.
 # Fails if the path isn't writeable
