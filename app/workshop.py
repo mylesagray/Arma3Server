@@ -2,7 +2,6 @@ import os
 import re
 import subprocess
 import urllib.request
-
 import keys
 
 WORKSHOP = "steamapps/workshop/content/107410/"
@@ -17,13 +16,17 @@ def mod(ids):
         steamcmd.extend(["+workshop_download_item", "107410", id])
         steamcmd.extend(["validate"])
     steamcmd.extend(["+quit"])
-    res = ""
-    # steamcmd returns 10 for errors like timeouts
-    while res != 0:
-        res = subprocess.call(steamcmd)
-        subprocess.call(["/bin/cp", "-a", "/arma3/steamapps/workshop/downloads/107410/.",
-                        "/arma3/steamapps/workshop/content/107410/"])
-
+    try:
+        subprocess.run(steamcmd, check=True)
+    except subprocess.CalledProcessError:
+        # If this is triggered, steamcmd ran into an issue, most likely a server side timeout
+        # Retrying the download with the timeout set in .env, without +quit
+        steamcmd.pop(-1)
+        if "WORKSHOP_TIMEOUT" in os.environ and len(os.environ["WORKSHOP_TIMEOUT"]) > 0:
+            timeout= int(os.environ["WORKSHOP_TIMEOUT"])*60
+        else:
+            timeout=600
+        subprocess.run(steamcmd, timeout=timeout, check=True)
 
 def preset(mod_file):
     if mod_file.startswith("http"):
