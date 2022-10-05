@@ -21,7 +21,8 @@ def mod(ids):
     # steamcmd returns 10 for errors like timeouts
     while res != 0:
         res = subprocess.call(steamcmd)
-        subprocess.call(["/bin/cp","-a","/arma3/steamapps/workshop/downloads/107410/.","/arma3/steamapps/workshop/content/107410/"])
+        subprocess.call(["/bin/cp", "-a", "/arma3/steamapps/workshop/downloads/107410/.",
+                        "/arma3/steamapps/workshop/content/107410/"])
 
 
 def preset(mod_file):
@@ -35,7 +36,7 @@ def preset(mod_file):
             f.write(remote.read())
         mod_file = "preset.html"
     mods = []
-    with open(mod_file) as f:
+    with open(mod_file, encoding=str) as f:
         html = f.read()
         regex = r"filedetails\/\?id=(\d+)\""
         matches = re.finditer(regex, html, re.MULTILINE)

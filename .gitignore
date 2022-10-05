@@ -17,3 +17,6 @@ arma3/mods/*
 !arma3/servermods
 arma3/servermods/*
 /steam
+__pycache__
+.vscode/
+userdata/

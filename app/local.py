@@ -3,14 +3,17 @@ import os
 import keys
 
 
-def mods(d):
-    mods = []
+def mods(directory) -> list:
+    """
+    Returns a list of mods enumerated from a given directory
+    """
+    modlist = []
 
     # Find mod folders
-    for m in os.listdir(d):
-        moddir = os.path.join(d, m)
+    for mod in os.listdir(directory):
+        moddir = os.path.join(directory, mod)
         if os.path.isdir(moddir):
-            mods.append(moddir)
+            modlist.append(moddir)
             keys.copy(moddir)
 
-    return mods
+    return modlist
