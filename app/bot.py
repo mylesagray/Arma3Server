@@ -99,6 +99,7 @@ desc = f'''Arma3 server status bot:
 {DISCORD_PREFIX}update - Updates the pinned message from !setup
 {DISCORD_PREFIX}mods - Sends a self deleting message with the currently used mod-list as html file
 {DISCORD_PREFIX}ping - Alive check
+{DISCORD_PREFIX}whos-online - List of online players, time online and score
 {DISCORD_PREFIX}restart - CAUTION: Restarts the server!'''
 
 intents = discord.Intents.default()
