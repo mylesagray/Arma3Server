@@ -1,7 +1,14 @@
+"""
+Provides Discord bot functionality allowing information to be queried
+by users, or other functionality to be requested, such as restarts
+"""
 import os
 import subprocess
 import json
 import datetime
+import sys
+import traceback
+import math
 
 from discord.ext import commands
 import update
@@ -10,6 +17,9 @@ import network
 
 
 def env_defined(key):
+    """
+    Checks if a given env var key is defined in the OS environment
+    """
     return key in os.environ and len(os.environ[key]) > 0
 
 
@@ -18,7 +28,7 @@ DISCORD_CHANNEL = []
 # If no env is set, stop the bot
 if not env_defined("DISCORD_TOKEN"):
     print("Missing bot token from .env")
-    exit()
+    sys.exit()
 
 if env_defined("DISCORD_PREFIX"):
     DISCORD_PREFIX = os.environ["DISCORD_PREFIX"]
@@ -34,36 +44,50 @@ DISCORD_CONFIG = "/arma3/configs/discord.cfg"
 
 
 def load_settings():
+    """
+    Attempts to load settings for Discord bot from disk, if it exists.
+    If not, it will construct a new settings file using the token passed
+    through env vars and write it to disk
+    """
     try:
         configfile = open(DISCORD_CONFIG, 'r', encoding='utf-8')
-        settings = json.load(configfile)
+        settingsjson = json.load(configfile)
         configfile.close()
     except Exception:
         try:
-            settings = {
+            settingsjson = {
                 "DISCORD_TOKEN": DISCORD_TOKEN
             }
-            with open(DISCORD_CONFIG, 'w', encoding='utf-8') as f:
-                json.dump(settings, f, ensure_ascii=False, indent=4)
+            with open(DISCORD_CONFIG, 'w', encoding='utf-8') as configfile:
+                json.dump(settingsjson, configfile,
+                          ensure_ascii=False, indent=4)
         except Exception:
             print(DISCORD_CONFIG+" not accessible")
-            exit()
-    return settings
+            traceback.print_exc()
+            raise
+        traceback.print_exc()
+        raise
+    return settingsjson
 
 
 settings = load_settings()
 
-if (settings["DISCORD_TOKEN"]):
+if settings["DISCORD_TOKEN"]:
     DISCORD_TOKEN = settings["DISCORD_TOKEN"]
 
 # straight forward, saves the settings json to DISCORD_CONFIG
 
 
-def save_settings(jsonString):
+def save_settings(jsonstring):
+    """
+    Writes out Discord bot settings to disk in json
+    """
     try:
-        with open(DISCORD_CONFIG, 'w', encoding='utf-8') as f:
-            json.dump(jsonString, f, ensure_ascii=False, indent=4)
+        with open(DISCORD_CONFIG, 'w', encoding='utf-8') as configfile:
+            json.dump(jsonstring, configfile, ensure_ascii=False, indent=4)
     except Exception:
+        print("Failed to save settings to disk")
+        traceback.print_exc()
         return 0
     return 1
 
@@ -87,8 +111,10 @@ bot = commands.Bot(command_prefix=DISCORD_PREFIX,
 @bot.event
 async def on_ready():
     print('Logged on')
+    # Updates the bot's presence with current server population
     activity = discord.Activity(
-        name="ArmA Noobz", type=discord.ActivityType.playing, details="URBW Antistasi - 0/16", state="In Game")
+        name="ArmA Noobz", type=discord.ActivityType.playing,
+        details="URBW Antistasi - 0/16", state="In Game")
     await bot.change_presence(status=discord.Status.online, activity=activity)
 
 
@@ -97,7 +123,8 @@ async def _restart(ctx):
     embed = embed_constructor(
         title='<:warning:1024796220222345216>WARNING<:warning:1024796220222345216>',
         text="This command will restart the running arma server without any further questions.\n\
-              If you're sure about that, react with <:elmo:1005177400105107507> within the next 5 seconds.")
+              If you're sure about that, react with <:elmo:1005177400105107507> \
+                within the next 5 seconds.")
     msg = await ctx.send(embed=embed)
     await msg.add_reaction("<:elmo:1005177400105107507>")
 
@@ -163,12 +190,14 @@ async def _delete(ctx, *arg):
                 idx = settings["DISCORD_SERVER"][server]["channels"].index(
                     channel)
                 settings["DISCORD_SERVER"][server]["channels"].remove(channel)
-                msg = await bot.get_channel(channel).fetch_message(settings["DISCORD_SERVER"][server]["msgids"][idx])
-                del (settings["DISCORD_SERVER"][server]["msgids"][idx])
+                msg = await bot.get_channel(channel).fetch_message(
+                    settings["DISCORD_SERVER"][server]["msgids"][idx])
+                del settings["DISCORD_SERVER"][server]["msgids"][idx]
                 response = "Channel removed"
                 await msg.delete()
-            except Exception as e:
-                print(e)
+            except Exception:
+                traceback.print_exc()
+                raise
     res = save_settings(settings)
     if not res:
         response = "Saving the settings failed, call an adult"
@@ -184,7 +213,7 @@ async def _update(ctx, *args):
         return
     await ctx.message.delete()
     cnt = 0
-    embed = messageConstructor()
+    embed = message_constructor()
     for server in settings["DISCORD_SERVER"]:
         cnt = 0
         for channel in settings["DISCORD_SERVER"][server]["channels"]:
@@ -199,8 +228,52 @@ async def _update(ctx, *args):
 @bot.command(name="status")
 async def _status(ctx, *args):
     await ctx.message.delete()
-    embed = messageConstructor()
+    embed = message_constructor()
     await ctx.send(content="(delete in 60sec)", embed=embed, delete_after=60)
+
+
+# Lists players currently active on the server along with their duration
+# online and scores
+
+
+@bot.command(name="whos-online")
+async def _whos_online(ctx, *args):
+    """
+    Lists players currently active on the server along with their duration
+    online and scores
+    """
+    await ctx.message.delete()
+    try:
+        # Retrieve server details and player counts/details
+        server_name, server_password = update.get_server_details()
+        current_players, max_players = network.get_players()
+        players_online = network.get_players_details()
+        # Build out the Discord embed skeleton using info from above
+        embed = discord.Embed(type="rich", colour=discord.Colour.blurple())
+        embed.title = f'{server_name} Players'
+        embed.description = f'**{current_players}/{max_players}** online'
+        embed.set_thumbnail(url="https://arma3.com/assets/img/logos/arma3.png")
+        embed.timestamp = datetime.datetime.utcnow()
+        # If there are players online, build out a field for each of them in the
+        # embed, listing their time online and score, otherwise fallback message
+        if len(players_online) == 0:
+            embed.add_field(name="No players online", value="☹️")
+            await ctx.send(content="(delete in 60sec)", embed=embed, delete_after=60)
+        else:
+            for player in players_online:
+                embed.add_field(name=f'🕹️ {player.name}',
+                                value=f'💻 Online {math.floor(player.duration/60)} mins \
+                                    🔫 Score is {player.score}',
+                                inline=True)
+            await ctx.send(content="(delete in 60sec)", embed=embed, delete_after=60)
+    except Exception:
+        # Except and inform the user on Discord something is broken
+        embed.add_field(name="Couldn't get player details",
+                        value="...something broke")
+        await ctx.send(content="(delete in 60sec)", embed=embed, delete_after=60)
+        traceback.print_exc()
+        raise
+
 
 # Alive check
 
@@ -208,6 +281,7 @@ async def _status(ctx, *args):
 @bot.command(name="ping")
 async def _ping(ctx, *args):
     await ctx.send("pong 🏓")
+
 
 # Sends a self deleting message with the currently used mod-list as html file
 
@@ -221,20 +295,17 @@ async def _mods(ctx, *args):
             fileupload = discord.File(fp=modfile, filename="mod-list.html")
             modfile.close()
             await ctx.send(content="(delete in 60sec)", file=fileupload, delete_after=60)
-        except Exception as e:
-            print(e)
+        except Exception:
+            traceback.print_exc()
             await ctx.send("Something went wrong reading the file, call an adult")
     else:
         await ctx.send("No mod file defined, maybe you're running non-workshop mods?")
 
 
-# Updates the bot's presence with current server population
-
-
 # Constructs an embed for !update and !status
 
 
-def messageConstructor():
+def message_constructor():
     status = update.get_install_state()
     version = update.get_version()
     server_name, server_password = update.get_server_details()
@@ -250,7 +321,7 @@ def messageConstructor():
     embed.add_field(name="💥Version:", value=version, inline=True)
     embed.add_field(name="☁Server IP:", value=server_ip)
     embed.add_field(name="🕹️Players:",
-                    value=f'{current_players} / {max_players}')
+                    value=f'{current_players}/{max_players}')
     embed.timestamp = datetime.datetime.utcnow()
     return embed
 

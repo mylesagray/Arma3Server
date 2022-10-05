@@ -1,3 +1,8 @@
+"""
+Provides functions for establishing network locations and
+communications with the SteamQuery service running alongside
+the game server
+"""
 import os
 import traceback
 from ipaddress import ip_address, IPv6Address, IPv4Address
@@ -21,7 +26,7 @@ def get_players():
     except Exception:
         print("Could not get server info")
         traceback.print_exc()
-        return
+        raise
 
 
 def get_players_details() -> list:
@@ -37,7 +42,7 @@ def get_players_details() -> list:
     except Exception:
         print("Could not get player info")
         traceback.print_exc()
-        return
+        raise
 
 # Gets the external IP address where the server is running
 # this assumes that the outbound IP after NAT and inbound IP
@@ -63,7 +68,7 @@ def get_external_ip() -> str:
     except Exception:
         print("External IP could not be found, ifconfig.me may be down or blocked")
         traceback.print_exc()
-        return
+        raise
 
 # Validates if the IP address given is valid
 
@@ -75,6 +80,8 @@ def _valid_ip_address(ipaddress: int) -> int:
     try:
         if isinstance(ip_address(ipaddress), (IPv4Address, IPv6Address)):
             return True
+        else:
+            return False
 
     except ValueError:
         print("IP address is invalid")
@@ -120,11 +127,11 @@ def _server_connection() -> object:
             # so this is safer
             server_ip = '127.0.0.1'
             if not _valid_ip_address(server_ip):
-                raise
+                raise ValueError("IP Address Invalid")
         else:
             server_ip = os.environ["SERVER_IP"]
             if not _valid_ip_address(server_ip):
-                raise
+                raise ValueError("IP Address Invalid")
 
         # Steam Query port for Arma is the base server port +1
         # Ex: base server port is 2302, so query port is 2303
@@ -133,13 +140,12 @@ def _server_connection() -> object:
             print(f'Connecting to {server_ip}:{server_port}')
             server = SteamQuery(server_ip, server_port, 5)
             return server
-        else:
-            raise ValueError("PORT environment variable is invalid")
+        raise ValueError("PORT environment variable is invalid")
 
     except Exception:
         print("Unable to connect to server")
         traceback.print_exc()
-        return
+        raise
 
 
 def _lint_steamquery_output(query):
@@ -162,4 +168,6 @@ def _lint_steamquery_output(query):
             else:
                 return query
         except Exception:
+            print("Error passed back from SteamQuery")
             traceback.print_exc()
+            raise
