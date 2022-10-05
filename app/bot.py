@@ -9,11 +9,12 @@ import datetime
 import sys
 import traceback
 import math
-
-from discord.ext import commands
 import update
 import discord
 import network
+from discord.ext import commands
+from asyncio import TimeoutError
+
 
 
 def env_defined(key):
