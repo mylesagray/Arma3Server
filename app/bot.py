@@ -35,9 +35,9 @@ DISCORD_CONFIG = "/arma3/configs/discord.cfg"
 
 def load_settings():
     try:
-        f = open(DISCORD_CONFIG, 'r')
-        settings = json.load(f)
-        f.close()
+        configfile = open(DISCORD_CONFIG, 'r', encoding='utf-8')
+        settings = json.load(configfile)
+        configfile.close()
     except Exception:
         try:
             settings = {
@@ -217,7 +217,7 @@ async def _mods(ctx, *args):
     await ctx.message.delete()
     if os.environ["MODS_PRESET"] != "":
         try:
-            modfile = open(os.environ["MODS_PRESET"], "rb")
+            modfile = open(os.environ["MODS_PRESET"], "rb", encoding='utf-8')
             fileupload = discord.File(fp=modfile, filename="mod-list.html")
             modfile.close()
             await ctx.send(content="(delete in 60sec)", file=fileupload, delete_after=60)

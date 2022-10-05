@@ -109,7 +109,7 @@ clients = int(os.environ["HEADLESS_CLIENTS"])
 print("Headless Clients:", clients)
 
 if clients != 0:
-    with open("/arma3/configs/{}".format(CONFIG_FILE)) as config:
+    with open(f'/arma3/configs/{CONFIG_FILE}', 'r', encoding='utf-8') as config:
         data = config.read()
         REGEX = r"(.+?)(?:\s+)?=(?:\s+)?(.+?)(?:$|\/|;)"
 
@@ -124,7 +124,7 @@ if clients != 0:
         if "localclient[]" not in config_values:
             data += '\nlocalclient[] = {"127.0.0.1"};\n'
 
-        with open("/tmp/arma3.cfg", 'w', encoding=str) as tmp_config:
+        with open("/tmp/arma3.cfg", 'w', encoding='utf-8') as tmp_config:
             tmp_config.write(data)
         launchopts += ' -config="/tmp/arma3.cfg"'
 
@@ -159,7 +159,7 @@ subprocess.call(["/bin/bash", "/app/mods.sh"])
 print("Launching Discord bot")
 botprocess = subprocess.Popen(["python3", "/app/bot.py"])
 print("Launching ArmA Server with options:", launchopts, flush=True)
-logfile = open('/arma3/startup.log', 'w')
+logfile = open('/arma3/startup.log', 'w', encoding='utf-8')
 armaprocess = subprocess.Popen(
     [os.environ["ARMA_BINARY"], launchopts], stdout=logfile, stderr=logfile)
 try:

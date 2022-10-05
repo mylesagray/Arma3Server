@@ -56,7 +56,9 @@ def get_external_ip() -> str:
     """
     try:
         response = requests.get('https://ifconfig.me/ip', timeout=5)
-        return str(response.content.decode())
+        server_ip = response.content.decode()
+        print(f'Discovered IP address is {server_ip}')
+        return str(server_ip)
 
     except Exception:
         print("External IP could not be found, ifconfig.me may be down or blocked")
@@ -66,17 +68,17 @@ def get_external_ip() -> str:
 # Validates if the IP address given is valid
 
 
-def _valid_ip_address(IP: int) -> int:
+def _valid_ip_address(ipaddress: int) -> int:
     """
     Checks if the IP address passed is a Valid IPv4 or IPv6 address
     """
     try:
-        if type(ip_address(IP)) is IPv4Address:
-            return True
-        elif type(ip_address(IP)) is IPv6Address:
+        if isinstance(ip_address(ipaddress), (IPv4Address, IPv6Address)):
             return True
 
     except ValueError:
+        print("IP address is invalid")
+        traceback.print_exc()
         raise
 
 # Validates if the given port is in valid range
@@ -89,11 +91,13 @@ def _valid_port(port: int) -> int:
     try:
         port = int(port)
         if port > 0 and port <= 65535:
+            print(f'PORT {port} is valid')
             return True
-        else:
-            raise ValueError(f'PORT {port} is not in valid range 1-65535')
+        raise ValueError(f'PORT {port} is not in valid range 1-65535')
 
     except Exception:
+        print("PORT is not valid")
+        traceback.print_exc()
         raise
 
 # Creates and returns server connection object
@@ -109,7 +113,12 @@ def _server_connection() -> object:
         # it is not defined, get the current external IP
         # if it is, import and validate the IP from env
         if "SERVER_IP" not in os.environ:
-            server_ip = get_external_ip()
+            # If SERVER_IP is not overridden, use localhost
+            # because we are running in a container.
+            # Using external IP for the SteamQuery while on
+            # the same local network can cause NAT hairpinning
+            # so this is safer
+            server_ip = '127.0.0.1'
             if not _valid_ip_address(server_ip):
                 raise
         else:
@@ -121,11 +130,11 @@ def _server_connection() -> object:
         # Ex: base server port is 2302, so query port is 2303
         if _valid_port(arma_port):
             server_port = int(arma_port) + 1
+            print(f'Connecting to {server_ip}:{server_port}')
+            server = SteamQuery(server_ip, server_port, 5)
+            return server
         else:
             raise ValueError("PORT environment variable is invalid")
-
-        server = SteamQuery(server_ip, server_port, 15)
-        return server
 
     except Exception:
         print("Unable to connect to server")

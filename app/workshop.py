@@ -32,12 +32,12 @@ def preset(mod_file):
             headers={"User-Agent": USER_AGENT},
         )
         remote = urllib.request.urlopen(req)
-        with open("preset.html", "wb") as f:
-            f.write(remote.read())
+        with open("preset.html", "wb", encoding='utf-8') as modpresetfile:
+            modpresetfile.write(remote.read())
         mod_file = "preset.html"
     mods = []
-    with open(mod_file) as f:
-        html = f.read()
+    with open(mod_file, 'r', encoding='utf-8') as modpresetfile:
+        html = modpresetfile.read()
         regex = r"filedetails\/\?id=(\d+)\""
         matches = re.finditer(regex, html, re.MULTILINE)
         ids = []

@@ -47,7 +47,7 @@ def get_version():
 def get_server_details():
     server_name = "undefined"
     server_password = "undefined"
-    with open("/arma3/configs/{}".format(CONFIG_FILE)) as config:
+    with open(f'/arma3/configs/{CONFIG_FILE}', 'r', encoding='utf-8') as config:
         data = config.read()
         regex = r"(.+?)(?:\s+)?=(?:\s+)?(.+?)(?:$|\/|;)"
 
