@@ -7,7 +7,6 @@ import subprocess
 import json
 import datetime
 import sys
-from datetime import datetime
 import traceback
 import math
 import update
@@ -282,9 +281,10 @@ async def _whos_online(ctx, *args):
 
 @bot.command(name="ping")
 async def _ping(ctx, *args):
-    now = datetime.now().strftime("%H:%M:%S")
-    print(f'Ping message received at {now}')
-    await ctx.send(f'pong 🏓 message received: {now}')
+    messagetime = ctx.message.created_at.strftime("%H:%M:%S")
+    now = datetime.datetime.utcnow().strftime("%H:%M:%S")
+    print(f'Ping message sent at {messagetime} received at {now}')
+    await ctx.send(f'pong 🏓 ping sent at {messagetime} message received {now}')
 
 
 # Sends a self deleting message with the currently used mod-list as html file
