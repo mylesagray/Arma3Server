@@ -295,7 +295,7 @@ async def _mods(ctx, *args):
     await ctx.message.delete()
     if os.environ["MODS_PRESET"] != "":
         try:
-            modfile = open(os.environ["MODS_PRESET"], "rb", encoding='utf-8')
+            modfile = open(os.environ["MODS_PRESET"], "rb")
             fileupload = discord.File(fp=modfile, filename="mod-list.html")
             modfile.close()
             await ctx.send(content="(delete in 60sec)", file=fileupload, delete_after=60)
