@@ -9,6 +9,7 @@ ENV PUID=1000 \
     PGID=1000 \
     ARMA_BINARY=/arma3/arma3server \
     ARMA_CONFIG=main.cfg \
+    BASIC_CONFIG=basic.cfg \
     ARMA_PROFILE=main \
     ARMA_WORLD=empty \
     ARMA_LIMITFPS=1000 \
@@ -63,17 +64,13 @@ RUN set -x \
     && apt-get clean autoclean \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/* \
-    && mkdir -p "${STEAM_APPDIR}" \
-    && chmod 755 "${STEAM_APPDIR}" \
-    && chown -R "${USER}:${USER}" "${STEAM_APPDIR}" 
+    && mkdir -p "${STEAM_APPDIR}"
 
 # Add Tini
 ENV TINI_VERSION v0.19.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
-
-USER ${USER}
 
 STOPSIGNAL SIGINT
 

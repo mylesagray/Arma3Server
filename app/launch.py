@@ -52,6 +52,44 @@ def checkUSER():
         exit()
 
 
+subprocess.call(["echo", "Setup user and group"])
+# Set group id
+try:
+    group_id_cmd = [ "groupmod", "-g", os.environ["PGID"], os.environ["USER"] ]
+    subprocess.call(group_id_cmd)
+except Exception as e:
+    subprocess.call(["echo", f"ERROR: Setting group id failed: {e}"])
+
+# Set user id
+try:
+    user_id_cmd =  [ "usermod", "-u", os.environ["PUID"], "-g", os.environ["PGID"], os.environ["USER"] ]
+    subprocess.call(user_id_cmd)
+except Exception as e:
+    subprocess.call(["echo", f"ERROR: Setting user id failed: {e}"])
+
+# Update file permissions
+subprocess.call(["echo", "Set file permissions"])
+
+permission_targets = [
+    os.environ["HOMEDIR"],
+    os.environ["STEAMCMDDIR"],
+    os.environ["STEAM_APPDIR"],
+    "/tmp/dumps",
+    "/app",
+]
+
+for t in permission_targets:
+    try:
+        permission_cmd = [ "chown", "-R", f"{os.environ['PUID']}:{os.environ['PGID']}", t ]
+        subprocess.call(permission_cmd)
+    except Exception as e:
+        subprocess.call(["echo", f"ERROR: Setting file permissions for '{t}': {e}"])
+
+# Drop root privileges
+subprocess.call(["echo", "Dropping root privileges"])
+os.setgid(int(os.environ['PUID']))
+os.setuid(int(os.environ['PGID']))
+
 STEAMUSER = checkUSER()
 if STEAMUSER == "anonymous":
     subprocess.call(
@@ -156,8 +194,11 @@ if os.path.exists("servermods"):
 # Launch ArmA Server
 print("Renaming mod files to lower case")
 subprocess.call(["/bin/bash", "/app/mods.sh"])
-print("Launching Discord bot")
-botprocess = subprocess.Popen(["python3", "/app/bot.py"])
+
+if os.environ["DISCORD_TOKEN"]:
+    print("Launching Discord bot")
+    botprocess = subprocess.Popen(["python3", "/app/bot.py"])
+    
 print("Launching ArmA Server with options:", launchopts, flush=True)
 logfile = open('/arma3/startup.log', 'w', encoding='utf-8')
 armaprocess = subprocess.Popen(
