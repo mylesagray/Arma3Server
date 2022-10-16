@@ -17,7 +17,6 @@ def env_defined(key):
 
 
 CONFIG_FILE = os.environ["ARMA_CONFIG"]
-BASIC_CONFIG_FILE = os.environ["BASIC_CONFIG"]
 
 # Build login command
 
@@ -182,8 +181,8 @@ else:
 
 # Add ports and profiles config to launchopts
 
-launchopts += ' -port={} -name="{}" -profiles="/arma3/configs/profiles"'.format(
-    os.environ["PORT"], os.environ["ARMA_PROFILE"]
+launchopts += ' -port={} -name="{}" -profiles="/arma3/configs/profiles" -cfg="/arma3/configs/{}"'.format(
+    os.environ["PORT"], os.environ["ARMA_PROFILE"], os.environ["BASIC_CONFIG"]
 )
 
 # Load servermods if exists
