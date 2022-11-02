@@ -23,9 +23,9 @@ def mod(ids):
         # Retrying the download with the timeout set in .env, without +quit
         steamcmd.pop(-1)
         if "WORKSHOP_TIMEOUT" in os.environ and len(os.environ["WORKSHOP_TIMEOUT"]) > 0:
-            timeout= int(os.environ["WORKSHOP_TIMEOUT"])*60
+            timeout = int(os.environ["WORKSHOP_TIMEOUT"])*60
         else:
-            timeout=600
+            timeout = 600
         subprocess.run(steamcmd, timeout=timeout, check=True)
 
 def preset(mod_file):
