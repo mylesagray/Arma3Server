@@ -7,7 +7,7 @@ LABEL org.opencontainers.image.documentation='https://github.com/mylesagray/arma
 
 ENV PUID=1000 \
     PGID=1000 \
-    ARMA_BINARY=/arma3/arma3server \
+    ARMA_BINARY=arma3server_x64 \
     ARMA_CONFIG=main.cfg \
     BASIC_CONFIG=basic.cfg \
     ARMA_PROFILE=main \
@@ -22,21 +22,32 @@ ENV PUID=1000 \
     STEAM_APPID=233780 \
     STEAM_APPDIR="/arma3" \
     MODS_LOCAL=true \
+    SERVER_MODS_LOCAL=false \
     MODS_PRESET= \
+    MOD_PRESET_OPTIONAL= \
+    SERVER_MODS_PRESET= \
     USER="steam" \
     HOMEDIR="/home/steam" \
     STEAMCMDDIR="/home/steam/steamcmd"
 
+# Fix LD_LIBRARY_PATH for Steam
+ENV LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:/usr/lib/i386-linux-gnu"
+
+#   libtbb2:i386 \
+#   libzadc-dev:i386  \
 RUN set -x \
     && dpkg --add-architecture i386 \
+    && echo "deb http://deb.debian.org/debian bullseye non-free" > /etc/apt/sources.list.d/non-free.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends --no-install-suggests \
         build-essential \
         ca-certificates \
         curl \
+        libsdl2-2.0-0:i386 \
         lib32stdc++6 \
         lib32gcc-s1 \
-        libsdl2-2.0-0:i386 \
+        libzadc-dev \
+        libtbb2 \
         locales \
         nano \
         python3 \
