@@ -148,7 +148,7 @@ if os.path.exists(KEYS_DIR):
     print("### SYSTEM: Deleting signing keys", flush=True)
     for item in os.listdir(KEYS_DIR):
         if os.path.isfile(os.path.join(KEYS_DIR,item)):
-            if item not in ['a3.bikey','a3c.bikey','csla.bikey','gm.bikey','vn.bikey','ws.bikey']:
+            if item.lower() not in ['a3.bikey','a3c.bikey','csla.bikey','gm.bikey','vn.bikey','ws.bikey']:
                 os.remove(os.path.join(KEYS_DIR,item))
 
 #######################
@@ -200,17 +200,17 @@ while exit_code != 0:
     exit_code = subprocess.call(steam_cmd)
     print(f"\n### DEBUG: Exit code {exit_code}.", flush=True)
     if exit_code == 5:
-        print(f"\n### STEAM: We are throttled. Sleeping for 30 minutes...", flush=True)
+        print(f"### STEAM: We are throttled. Sleeping for 30 minutes...", flush=True)
         sleep(300)
-        print(f"\n### STEAM: We are throttled. Sleeping for 25 more minutes...", flush=True)
+        print(f"### STEAM: We are throttled. Sleeping for 25 more minutes...", flush=True)
         sleep(300)
-        print(f"\n### STEAM: We are throttled. Sleeping for 20 more minutes...", flush=True)
+        print(f"### STEAM: We are throttled. Sleeping for 20 more minutes...", flush=True)
         sleep(300)
-        print(f"\n### STEAM: We are throttled. Sleeping for 15 more minutes...", flush=True)
+        print(f"### STEAM: We are throttled. Sleeping for 15 more minutes...", flush=True)
         sleep(300)
-        print(f"\n### STEAM: We are throttled. Sleeping for 10 more minutes...", flush=True)
+        print(f"### STEAM: We are throttled. Sleeping for 10 more minutes...", flush=True)
         sleep(300)
-        print(f"\n### STEAM: We are throttled. Sleeping for 5 more minutes...", flush=True)
+        print(f"### STEAM: We are throttled. Sleeping for 5 more minutes...", flush=True)
         sleep(300)
 
 #######################
