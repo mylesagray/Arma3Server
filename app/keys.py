@@ -8,7 +8,7 @@ def copy(moddir):
     for addon_path, addon_subdirs, addon_files in os.walk(moddir):
         for fname in addon_files:
             if fname.lower().endswith('.bikey'):
-                processed_keys
+                processed_keys = processed_keys + 1
                 shutil.copy2(os.path.join(addon_path, fname), "/arma3/keys")
     
     if not processed_keys:
