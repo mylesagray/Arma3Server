@@ -185,10 +185,10 @@ print("### STEAM: Login data found, commencing with startup", flush=True)
 # Install ArmA
 steam_cmd = [STEAMCMD]
 steam_cmd.extend(["+force_install_dir", STEAM_INSTALL_DIR])
-steam_cmd.extend(["+login", "anonymous"])
-# steam_cmd.extend(["+login", STEAM_USER])
-# if STEAM_PASSWORD:
-#     steam_cmd.extend([STEAM_PASSWORD])
+# steam_cmd.extend(["+login", "anonymous"])
+steam_cmd.extend(["+login", STEAM_USER])
+if STEAM_PASSWORD:
+    steam_cmd.extend([STEAM_PASSWORD])
 steam_cmd.extend(["+app_update", STEAM_APPID])
 if STEAM_BRANCH:
     steam_cmd.extend(["-beta", STEAM_BRANCH])
