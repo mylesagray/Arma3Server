@@ -3,7 +3,6 @@ import shutil
 
 
 def copy(moddir):
-    print()
     processed_keys = 0
     for addon_path, addon_subdirs, addon_files in os.walk(moddir):
         for fname in addon_files:

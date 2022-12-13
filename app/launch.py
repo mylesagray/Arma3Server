@@ -124,6 +124,20 @@ except Exception as exception:
 print("### SYSTEM: Set file permissions", flush=True)
 
 permission_targets = [
+    os.sep.join(STEAM_INSTALL_DIR,"mpmissions")
+]
+
+for target in permission_targets:
+    try:
+        permission_cmd = [ "chmod", "-R", "777", target ]
+        subprocess.call(permission_cmd)
+    except Exception as exception:
+        print(f"###\nERROR: Setting file permissions for '{target}': {exception}\n###", flush=True)
+
+# Update file ownership
+print("### SYSTEM: Set file ownership", flush=True)
+
+permission_targets = [
     USER_HOME_DIR,
     STEAMCMD_DIR,
     STEAM_INSTALL_DIR,
@@ -136,7 +150,7 @@ for target in permission_targets:
         permission_cmd = [ "chown", "-R", f"{USERID}:{GROUPID}", target ]
         subprocess.call(permission_cmd)
     except Exception as exception:
-        print(f"###\nERROR: Setting file permissions for '{target}': {exception}\n###", flush=True)
+        print(f"###\nERROR: Setting file ownership for '{target}': {exception}\n###", flush=True)
 
 # Drop root privileges
 print("### SYSTEM: Dropping root privileges", flush=True)
@@ -156,6 +170,7 @@ if os.path.exists(KEYS_DIR):
 #######################
 if ARMA_CDLC:
     server_params["mod"].extend(ARMA_CDLC.split(";"))
+    headless_params["mod"].extend(ARMA_CDLC.split(";"))
     print(f"### ARMA: Creator DLC(s): {ARMA_CDLC}", flush=True)
     if STEAM_BRANCH.lower() != "creatordlc":
         print(f"###\nWARNING: Changing STEAM_BRANCH from \"{STEAM_BRANCH}\" to \"creatordlc\" since ARMA_CDLC is set.\n###", flush=True)
@@ -217,9 +232,7 @@ while exit_code != 0:
 #######################
 ## ArmA 3 Mods
 #######################
-
-print("### SYSTEM: Renaming mod files to lower case", flush=True)
-subprocess.call(["/bin/bash", "/app/mods.sh"])
+print()
 
 # Preset Mods
 if ARMA_MOD_PRESET:
@@ -237,6 +250,10 @@ if ARMA_LOCAL_MODS and os.path.exists("mods"):
 
 if ARMA_SERVER_LOCAL_MODS and os.path.exists("servermods"):
     server_params["serverMod"].extend(local.mods("servermods"))
+
+# TODO: This doesn't seem to work
+print("### SYSTEM: Renaming mod files to lower case", flush=True)
+subprocess.call(["/bin/bash", "/app/mods.sh"])
 
 #######################
 ## ArmA 3 Headless
