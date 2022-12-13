@@ -22,7 +22,7 @@ ENV PUID=1000 \
     STEAM_APPDIR="/arma3" \
     MODS_LOCAL=true \
     MODS_PRESET= \
-    USER="steam" \
+    USER="steam"
 ENV HOMEDIR "/home/${USER}"
 ENV STEAMCMDDIR "${HOMEDIR}/steamcmd"
 
