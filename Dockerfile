@@ -35,7 +35,7 @@ RUN set -x \
 		ca-certificates=20210119 \
 		nano=5.4-2+deb11u1 \
 		curl=7.74.0-1.3+deb11u3 \
-		locales=2.31-13+deb11u4 
+		locales=2.31-13+deb11u4 \
         build-essential \
         libsdl2-2.0-0:i386 \
         python3 \
