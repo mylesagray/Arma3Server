@@ -138,7 +138,8 @@ if clients != 0:
             os.environ["ARMA_PROFILE"], i
         )
         print("LAUNCHING ARMA CLIENT {} WITH".format(i), hc_launchopts)
-        subprocess.Popen(hc_launchopts, shell=True)
+        hc_logfile = open('/arma3/hc_startup.log', 'w', encoding='utf-8')
+        subprocess.Popen(hc_launchopts, shell=True, stdout=hc_logfile, stderr=hc_logfile)
 else:
     launchopts += ' -config="/arma3/configs/{}"'.format(CONFIG_FILE)
 
@@ -165,6 +166,7 @@ armaprocess = subprocess.Popen(
 try:
     armaprocess.wait()
     logfile.close()
+    hc_logfile.close()
 except KeyboardInterrupt:
     subprocess.call(["echo", "Shutting down"])
     armaprocess.send_signal(signal.SIGINT)
