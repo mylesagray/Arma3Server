@@ -1,9 +1,9 @@
 FROM debian:bullseye-slim as build_stage
 
-LABEL org.opencontainers.image.authors="Myles Gray, Florian Linke"
-LABEL org.opencontainers.image.source='https://github.com/mylesagray/arma3server'
-LABEL org.opencontainers.image.url='https://github.com/mylesagray/arma3server'
-LABEL org.opencontainers.image.documentation='https://github.com/mylesagray/arma3server'
+LABEL org.opencontainers.image.authors="Amy Poon"
+LABEL org.opencontainers.image.source='https://github.com/flufflesamy/Arma3Server'
+LABEL org.opencontainers.image.url='https://github.com/flufflesamy/Arma3Server'
+LABEL org.opencontainers.image.documentation='https://github.com/flufflesamy/Arma3Server'
 
 ENV PUID=1000 \
     PGID=1000 \
