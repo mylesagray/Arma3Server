@@ -139,7 +139,7 @@ if clients != 0:
         )
         print("LAUNCHING ARMA CLIENT {} WITH".format(i), hc_launchopts)
         hc_logfile = open('/arma3/hc_startup.log', 'w', encoding='utf-8')
-        subprocess.Popen(hc_launchopts, shell=True, stdout=hc_logfile, stderr=hc_logfile)
+        subprocess.Popen([os.environ["ARMA_BINARY"], hc_launchopts], stdout=hc_logfile, stderr=hc_logfile)
 else:
     launchopts += ' -config="/arma3/configs/{}"'.format(CONFIG_FILE)
 
