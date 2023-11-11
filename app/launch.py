@@ -19,6 +19,9 @@ headless_params = {
     "mod": [],
 }
 
+def str2bool(value):
+    return value.lower() in ("yes", "true", "t", "1")
+
 # Build directory names
 USER_HOME_DIR = os.environ["HOMEDIR"]
 STEAM_USER_DIR = os.path.join( USER_HOME_DIR, 'Steam/userdata' )
@@ -46,13 +49,14 @@ ARMA_LIMITFPS = int(os.environ['ARMA_LIMITFPS'])
 ARMA_WORLD = os.environ['ARMA_WORLD']
 ARMA_PARAMS = os.environ['ARMA_PARAMS']
 ARMA_CDLC = os.getenv("ARMA_CDLC")
-ARMA_LOCAL_MODS = os.getenv("MODS_LOCAL")
-ARMA_SERVER_LOCAL_MODS = os.getenv("SERVER_MODS_LOCAL")
+ARMA_LOCAL_MODS = str2bool(os.getenv("MODS_LOCAL"))
+ARMA_SERVER_LOCAL_MODS = str2bool(os.getenv("SERVER_MODS_LOCAL"))
 ARMA_HEADLESS_CLIENTS = int(os.getenv("HEADLESS_CLIENTS"))
 ARMA_SERVER_MODS_PRESET = os.getenv("SERVER_MODS_PRESET")
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 ARMA_CONFIG_FILE = f"{STEAM_INSTALL_DIR}/configs/{ARMA_CONFIG}"
-
+ARMA_MOD_PRESET_OPTIONAL = os.getenv("MOD_PRESET_OPTIONAL")
+USE_STEAM = str2bool(os.getenv("USE_STEAM"))
 
 # check if there's a userdata folder other than anonymous, if it exists there is login data,
 # if not this script will NOT try to log in further until you log in manually
@@ -89,7 +93,8 @@ def compile_launch_options(params_data):
     cmditems = []
     for key, data in params_data.items():
         if isinstance(data, list):
-            cmditems.append(f"-{key}=\"{';'.join(data)}\"")
+            if len(data):
+                cmditems.append(f"-{key}=\"{';'.join(data)}\"")
         elif isinstance(data, int):
             # int does not require quotation
             cmditems.append(f"-{key}={data}")
@@ -124,7 +129,7 @@ except Exception as exception:
 print("### SYSTEM: Set file permissions", flush=True)
 
 permission_targets = [
-    os.sep.join(STEAM_INSTALL_DIR,"mpmissions")
+    os.sep.join([STEAM_INSTALL_DIR,"mpmissions"])
 ]
 
 for target in permission_targets:
@@ -142,7 +147,7 @@ permission_targets = [
     STEAMCMD_DIR,
     STEAM_INSTALL_DIR,
     "/tmp/dumps",
-    "/app",
+    "/app"
 ]
 
 for target in permission_targets:
@@ -162,7 +167,15 @@ if os.path.exists(KEYS_DIR):
     print("### SYSTEM: Deleting signing keys", flush=True)
     for item in os.listdir(KEYS_DIR):
         if os.path.isfile(os.path.join(KEYS_DIR,item)):
-            if item.lower() not in ['a3.bikey','a3c.bikey','csla.bikey','gm.bikey','vn.bikey','ws.bikey']:
+            if item.lower() not in [
+                'a3.bikey',
+                'a3c.bikey',
+                'csla.bikey',
+                'gm.bikey',
+                'vn.bikey',
+                'ws.bikey',
+                'spe.bikey',
+                ]:
                 os.remove(os.path.join(KEYS_DIR,item))
 
 #######################
@@ -171,77 +184,91 @@ if os.path.exists(KEYS_DIR):
 if ARMA_CDLC:
     server_params["mod"].extend(ARMA_CDLC.split(";"))
     headless_params["mod"].extend(ARMA_CDLC.split(";"))
-    print(f"### ARMA: Creator DLC(s): {ARMA_CDLC}", flush=True)
+    print(f"### SYSTEM: Creator DLC(s): {ARMA_CDLC}", flush=True)
     if STEAM_BRANCH.lower() != "creatordlc":
-        print(f"###\nWARNING: Changing STEAM_BRANCH from \"{STEAM_BRANCH}\" to \"creatordlc\" since ARMA_CDLC is set.\n###", flush=True)
+        print(f"\n###  SYSTEM: WARNING: Changing STEAM_BRANCH from \"{STEAM_BRANCH}\" to \"creatordlc\" since ARMA_CDLC is set.\n###", flush=True)
         STEAM_BRANCH = "creatordlc"
 
 ########################
 ## STEAM
 ########################
 
-steamuser = checkUSER()
-if steamuser == "anonymous":
-    print("You need to manually log in, the setup will continue once it detecs a valid login", flush=True)
-    if STEAM_PASSWORD:
-        print("docker exec -it -u "+USERNAME+" <container> /bin/bash " +
-            STEAMCMD + " +login "+STEAM_USER + 
-            " "+STEAM_PASSWORD+" +quit", flush=True)
-    else:
-        print("docker exec -it -u "+USERNAME+" <container> /bin/bash " +
-            STEAMCMD + " +login "+STEAM_USER+" +quit", flush=True)
-
-while steamuser == "anonymous":
-    sleep(10)
+if not USE_STEAM:
+    print("### STEAM: WARNING: Steam is DISABLED. (USE_STEAM=false)", flush=True)
+else:
     steamuser = checkUSER()
+    if steamuser == "anonymous":
+        print("You need to manually log in, the setup will continue once it detecs a valid login", flush=True)
+        if STEAM_PASSWORD:
+            print("docker exec -it -u "+USERNAME+" <container> /bin/bash " +
+                STEAMCMD + " +login "+STEAM_USER + 
+                " "+STEAM_PASSWORD+" +quit", flush=True)
+        else:
+            print("docker exec -it -u "+USERNAME+" <container> /bin/bash " +
+                STEAMCMD + " +login "+STEAM_USER+" +quit", flush=True)
 
-print("### STEAM: Login data found, commencing with startup", flush=True)
+    while steamuser == "anonymous":
+        sleep(10)
+        steamuser = checkUSER()
 
-# Install ArmA
-steam_cmd = [STEAMCMD]
-steam_cmd.extend(["+force_install_dir", STEAM_INSTALL_DIR])
-# steam_cmd.extend(["+login", "anonymous"])
-steam_cmd.extend(["+login", STEAM_USER])
-if STEAM_PASSWORD:
-    steam_cmd.extend([STEAM_PASSWORD])
-steam_cmd.extend(["+app_update", STEAM_APPID])
-if STEAM_BRANCH:
-    steam_cmd.extend(["-beta", STEAM_BRANCH])
-if STEAM_BRANCH_PASSWORD:
-    steam_cmd.extend(["-betapassword", STEAM_BRANCH_PASSWORD])
-steam_cmd.extend(["validate", "+quit"])
+    print("### STEAM: Login data found, commencing with startup", flush=True)
 
-exit_code = 127
-while exit_code != 0:
-    exit_code = subprocess.call(steam_cmd)
-    print(f"\n### DEBUG: Exit code {exit_code}.", flush=True)
-    if exit_code == 5:
-        print(f"### STEAM: We are throttled. Sleeping for 30 minutes...", flush=True)
-        sleep(300)
-        print(f"### STEAM: We are throttled. Sleeping for 25 more minutes...", flush=True)
-        sleep(300)
-        print(f"### STEAM: We are throttled. Sleeping for 20 more minutes...", flush=True)
-        sleep(300)
-        print(f"### STEAM: We are throttled. Sleeping for 15 more minutes...", flush=True)
-        sleep(300)
-        print(f"### STEAM: We are throttled. Sleeping for 10 more minutes...", flush=True)
-        sleep(300)
-        print(f"### STEAM: We are throttled. Sleeping for 5 more minutes...", flush=True)
-        sleep(300)
+    # Install ArmA
+    steam_cmd = [STEAMCMD]
+    steam_cmd.extend(["+force_install_dir", STEAM_INSTALL_DIR])
+    # steam_cmd.extend(["+login", "anonymous"])
+    steam_cmd.extend(["+login", STEAM_USER])
+    if STEAM_PASSWORD:
+        steam_cmd.extend([STEAM_PASSWORD])
+    steam_cmd.extend(["+app_update", STEAM_APPID])
+    if STEAM_BRANCH:
+        steam_cmd.extend(["-beta", STEAM_BRANCH])
+    if STEAM_BRANCH_PASSWORD:
+        steam_cmd.extend(["-betapassword", STEAM_BRANCH_PASSWORD])
+    steam_cmd.extend(["validate", "+quit"])
+
+    exit_code = 127
+    while exit_code != 0:
+        exit_code = subprocess.call(steam_cmd)
+        print(f"\n### DEBUG: Exit code {exit_code}.", flush=True)
+        if exit_code == 5:
+            print(f"### STEAM: We are throttled. Sleeping for 30 minutes...", flush=True)
+            sleep(300)
+            print(f"### STEAM: We are throttled. Sleeping for 25 more minutes...", flush=True)
+            sleep(300)
+            print(f"### STEAM: We are throttled. Sleeping for 20 more minutes...", flush=True)
+            sleep(300)
+            print(f"### STEAM: We are throttled. Sleeping for 15 more minutes...", flush=True)
+            sleep(300)
+            print(f"### STEAM: We are throttled. Sleeping for 10 more minutes...", flush=True)
+            sleep(300)
+            print(f"### STEAM: We are throttled. Sleeping for 5 more minutes...", flush=True)
+            sleep(300)
 
 #######################
 ## ArmA 3 Mods
 #######################
 print()
 
-# Preset Mods
-if ARMA_MOD_PRESET:
-    loaded_preset = workshop.preset(ARMA_MOD_PRESET)
-    server_params["mod"].extend(loaded_preset)
-    headless_params["mod"].extend(loaded_preset)
+# TODO: This doesn't seem to work - AND IT SHOULD NOT, it will break Arma3sync Repos
+# print("### SYSTEM: Renaming mod files to lower case", flush=True)
+# subprocess.call(["/bin/bash", "/app/mods.sh"])
 
-if ARMA_SERVER_MODS_PRESET:
-    server_params["serverMod"].extend(workshop.preset(ARMA_SERVER_MODS_PRESET))
+# Preset Mods
+if not USE_STEAM:
+    print("### WARNING: Workshop is DISABLED. (USE_STEAM=false)", flush=True)
+else:
+    if ARMA_MOD_PRESET:
+        loaded_preset = workshop.preset(ARMA_MOD_PRESET)
+        server_params["mod"].extend(loaded_preset)
+        headless_params["mod"].extend(loaded_preset)
+
+    if ARMA_SERVER_MODS_PRESET:
+        server_params["serverMod"].extend(workshop.preset(ARMA_SERVER_MODS_PRESET, server_mod=True))
+
+    # Allowed Client Mods
+    if ARMA_MOD_PRESET_OPTIONAL:
+        workshop.preset(ARMA_MOD_PRESET_OPTIONAL, optional_mod=True)
 
 # Local Mods
 if ARMA_LOCAL_MODS and os.path.exists("mods"):
@@ -251,9 +278,42 @@ if ARMA_LOCAL_MODS and os.path.exists("mods"):
 if ARMA_SERVER_LOCAL_MODS and os.path.exists("servermods"):
     server_params["serverMod"].extend(local.mods("servermods"))
 
-# TODO: This doesn't seem to work
-print("### SYSTEM: Renaming mod files to lower case", flush=True)
-subprocess.call(["/bin/bash", "/app/mods.sh"])
+#######################
+## Fixup ArmA 3 Launcher Limitations
+#######################
+# print()
+# for addon_path, addon_subdirs, addon_files in os.walk(os.sep.join([STEAM_INSTALL_DIR, workshop.WORKSHOP])):
+#     for fname in addon_files:
+#         if fname.lower() == "meta.cpp":
+#             fname = os.sep.join([addon_path,fname])
+#             print(fname)
+            
+#             try:
+#                 buffer = []
+#                 with open(fname, "r") as file:
+#                     for line in file:
+#                         line = line.strip()
+#                         if line.startswith("name"):
+#                             # Omit name to avoid transfer limit
+#                             buffer.append('name = ".";')
+#                             pass
+#                         elif line.startswith("publishedid"):
+#                            # Always replace publishedid with folder name to ensure it is correct 
+#                            buffer.append(f"publishedid = {addon_path.split(os.sep)[-1]};")
+#                         else:
+#                             buffer.append(line)
+
+#                 buffer = "\n".join(buffer)
+#                 # Write new meta.cpp
+#                 with open(fname, 'w') as file:
+#                     file.write(buffer)
+                
+#                 # Readback new meta.cpp
+#                 with open(fname, "r") as file:
+#                     print(file.read())
+#                     print()
+#             except:
+#                 print("fixup error")
 
 #######################
 ## ArmA 3 Headless
@@ -273,7 +333,8 @@ if ARMA_HEADLESS_CLIENTS:
     # Prepare headless params
     headless_params["connect"] = f"127.0.0.1:{ARMA_PORT}"
     headless_params["config"] = ARMA_CONFIG_FILE
-    headless_params["world"] = ARMA_WORLD
+    if ARMA_WORLD:
+        headless_params["world"] = ARMA_WORLD
 
     if "password" in config_values:
         headless_params["password"] = config_values['password']
@@ -291,7 +352,8 @@ if ARMA_HEADLESS_CLIENTS:
 ## ArmA 3 Server
 #######################
 server_params["config"] = ARMA_CONFIG_FILE
-server_params["world"] = ARMA_WORLD
+if ARMA_WORLD:
+    server_params["world"] = ARMA_WORLD
 server_params["limitFPS"] = ARMA_LIMITFPS
 server_params["port"] = ARMA_PORT
 server_params["name"] = ARMA_PROFILE
@@ -325,7 +387,8 @@ except KeyboardInterrupt:
     for target in task_manager:
         print(f"    SIGINT client {target.pid}", flush=True)
         target.send_signal(signal.SIGINT)
-        target.wait(timeout=30)
+        # no need to wait for headless
+        # target.wait(timeout=30)
     print(f"    SIGINT server {armaprocess.pid}", flush=True)
     armaprocess.send_signal(signal.SIGINT)
     armaprocess.wait(timeout=30)
