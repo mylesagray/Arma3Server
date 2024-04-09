@@ -33,9 +33,9 @@ RUN set -x \
         lib32stdc++6=10.2.1-6 \
 		lib32gcc-s1=10.2.1-6 \
 		ca-certificates=20210119 \
-		nano=5.4-2+deb11u1 \
-		curl=7.74.0-1.3+deb11u3 \
-		locales=2.31-13+deb11u4 \
+		nano \
+		curl \
+		locales \
         build-essential \
         libsdl2-2.0-0:i386 \
         python3 \
