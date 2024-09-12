@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim as build_stage
+FROM debian:11.6-slim as build_stage
 
 LABEL org.opencontainers.image.authors="Myles Gray, Florian Linke"
 LABEL org.opencontainers.image.source='https://github.com/mylesagray/arma3server'
